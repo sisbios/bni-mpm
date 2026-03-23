@@ -27,6 +27,9 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
+# Dummy DATABASE_URL so Prisma client initializes during build (no real connection made)
+ARG DATABASE_URL=postgresql://build:build@localhost:5432/build
+ENV DATABASE_URL=$DATABASE_URL
 
 RUN npx prisma generate
 RUN npm run build
