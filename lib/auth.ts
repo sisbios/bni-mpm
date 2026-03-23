@@ -110,6 +110,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session
     },
   },
+  cookies: {
+    sessionToken: {
+      name: process.env.NODE_ENV === 'production'
+        ? '__Secure-next-auth.session-token'
+        : 'next-auth.session-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax' as const,
+        path: '/',
+        domain: process.env.NEXTAUTH_COOKIE_DOMAIN || undefined,
+        secure: process.env.NODE_ENV === 'production',
+      },
+    },
+  },
   pages: { signIn: '/login' },
   session: {
     strategy: 'jwt',
