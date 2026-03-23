@@ -52,7 +52,7 @@ jobs:
             sleep 5
 
             echo "=== Building Docker image ==="
-            docker build -t bni-mpm:local .
+            docker build --network host -t bni-mpm:local .
 
             echo "=== Restarting app ==="
             docker compose up -d --force-recreate app
