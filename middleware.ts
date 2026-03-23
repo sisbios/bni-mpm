@@ -22,7 +22,7 @@ function getSubdomain(host: string): string | null {
   if (!hostname.endsWith('.' + DOMAIN_BASE)) return null
   const sub = hostname.slice(0, -(DOMAIN_BASE.length + 1))
   // Reserved subdomains — no chapter context
-  const RESERVED = new Set(['www', 'bni', 'region', 'admin', 'api'])
+  const RESERVED = new Set(['www', 'bni', 'bnimpm', 'region', 'admin', 'api'])
   if (!sub || RESERVED.has(sub)) return null
   return sub
 }
