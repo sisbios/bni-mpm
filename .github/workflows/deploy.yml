@@ -59,7 +59,9 @@ jobs:
 
             echo "=== Running DB migrations ==="
             sleep 10
-            docker exec bni-mpm npx prisma db push || true
+            cd /root/bni-mpm
+            DATABASE_URL="postgresql://bni:$(grep POSTGRES_PASSWORD .env | cut -d= -f2)@localhost:5436/bni" \
+              node_modules/.bin/prisma db push --schema=prisma/schema.prisma || true
 
             echo "=== Health check ==="
             sleep 5
