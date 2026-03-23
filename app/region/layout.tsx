@@ -564,7 +564,7 @@ export default function RegionLayout({ children }: { children: React.ReactNode }
         >
           {children}
           {/* Bottom nav spacer — mobile only */}
-          <div className="lg:hidden" style={{ height: '96px' }} />
+          <div className="lg:hidden" style={{ height: '196px' }} />
         </main>
       </div>
 

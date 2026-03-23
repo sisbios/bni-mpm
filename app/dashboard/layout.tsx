@@ -598,7 +598,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         >
           {children}
           {/* Bottom nav spacer — mobile only */}
-          <div className="lg:hidden" style={{ height: '96px' }} />
+          <div className="lg:hidden" style={{ height: '196px' }} />
         </main>
       </div>
 
