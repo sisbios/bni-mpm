@@ -62,9 +62,18 @@ function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () 
   }
 
   return (
-    <div className="glass-sidebar" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div
+      className="glass-sidebar"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        backdropFilter: 'blur(20px) saturate(160%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(160%)',
+      }}
+    >
       {/* Top accent line */}
-      <div style={{ height: '2px', background: 'linear-gradient(90deg, #3B82F6, #C9A84C)', flexShrink: 0 }} />
+      <div style={{ height: '2px', background: 'linear-gradient(90deg, #CC0000, #C9A84C)', flexShrink: 0 }} />
 
       {/* Logo */}
       <div
@@ -82,7 +91,7 @@ function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () 
             width: '40px',
             height: '40px',
             borderRadius: '10px',
-            background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)',
+            background: 'linear-gradient(135deg, #CC0000, #8B0000)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -91,7 +100,7 @@ function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () 
             color: '#fff',
             letterSpacing: '1px',
             flexShrink: 0,
-            boxShadow: '0 4px 12px rgba(59,130,246,0.35)',
+            boxShadow: '0 4px 12px rgba(204,0,0,0.35)',
           }}
         >
           BNI
@@ -159,17 +168,17 @@ function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () 
                 marginBottom: '2px',
                 textDecoration: 'none',
                 color: active ? '#ffffff' : '#9CA3AF',
-                background: active ? 'rgba(59,130,246,0.14)' : 'transparent',
-                border: active ? '1px solid rgba(59,130,246,0.22)' : '1px solid transparent',
+                background: active ? 'rgba(204,0,0,0.14)' : 'transparent',
+                border: active ? '1px solid rgba(204,0,0,0.22)' : '1px solid transparent',
                 backdropFilter: active ? 'blur(8px)' : 'none',
                 transition: 'all 0.15s',
                 fontSize: '13.5px',
                 fontWeight: active ? '600' : '400',
               }}
             >
-              <item.icon size={17} style={{ color: active ? '#3B82F6' : '#6B7280', flexShrink: 0 }} />
+              <item.icon size={17} style={{ color: active ? '#CC0000' : '#6B7280', flexShrink: 0 }} />
               <span style={{ flex: 1 }}>{item.label}</span>
-              {active && <ChevronRight size={13} style={{ color: '#3B82F6', opacity: 0.7 }} />}
+              {active && <ChevronRight size={13} style={{ color: '#CC0000', opacity: 0.7 }} />}
             </Link>
           )
         })}
@@ -197,18 +206,18 @@ function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () 
             borderRadius: '10px',
             textDecoration: 'none',
             color: pathname.startsWith('/region/settings') ? '#ffffff' : '#9CA3AF',
-            background: pathname.startsWith('/region/settings') ? 'rgba(59,130,246,0.14)' : 'transparent',
+            background: pathname.startsWith('/region/settings') ? 'rgba(204,0,0,0.14)' : 'transparent',
             border: pathname.startsWith('/region/settings')
-              ? '1px solid rgba(59,130,246,0.22)'
+              ? '1px solid rgba(204,0,0,0.22)'
               : '1px solid transparent',
             transition: 'all 0.15s',
             fontSize: '13.5px',
             fontWeight: pathname.startsWith('/region/settings') ? '600' : '400',
           }}
         >
-          <Settings size={17} style={{ color: pathname.startsWith('/region/settings') ? '#3B82F6' : '#6B7280', flexShrink: 0 }} />
+          <Settings size={17} style={{ color: pathname.startsWith('/region/settings') ? '#CC0000' : '#6B7280', flexShrink: 0 }} />
           <span style={{ flex: 1 }}>Settings</span>
-          {pathname.startsWith('/region/settings') && <ChevronRight size={13} style={{ color: '#3B82F6', opacity: 0.7 }} />}
+          {pathname.startsWith('/region/settings') && <ChevronRight size={13} style={{ color: '#CC0000', opacity: 0.7 }} />}
         </Link>
       </nav>
 
@@ -218,7 +227,7 @@ function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () 
           <div style={{ fontSize: '13px', fontWeight: '600', color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {session?.user?.name ?? 'Region Admin'}
           </div>
-          <div style={{ fontSize: '11px', color: '#3B82F6', textTransform: 'capitalize', fontWeight: '400' }}>
+          <div style={{ fontSize: '11px', color: '#CC0000', textTransform: 'capitalize', fontWeight: '400' }}>
             regionAdmin
           </div>
         </div>
@@ -239,9 +248,9 @@ function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () 
             transition: 'all 0.15s',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'rgba(59,130,246,0.1)'
-            e.currentTarget.style.color = '#3B82F6'
-            e.currentTarget.style.borderColor = 'rgba(59,130,246,0.22)'
+            e.currentTarget.style.background = 'rgba(204,0,0,0.1)'
+            e.currentTarget.style.color = '#CC0000'
+            e.currentTarget.style.borderColor = 'rgba(204,0,0,0.22)'
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.background = 'transparent'
@@ -294,15 +303,15 @@ function ProfileMenu() {
       >
         <div className="hidden sm:block" style={{ textAlign: 'right' }}>
           <div style={{ fontSize: '13px', fontWeight: '600', color: '#ffffff', lineHeight: '1.2', whiteSpace: 'nowrap' }}>{name}</div>
-          <div style={{ fontSize: '11px', fontWeight: '400', color: '#3B82F6', lineHeight: '1.2' }}>Region Admin</div>
+          <div style={{ fontSize: '11px', fontWeight: '400', color: '#CC0000', lineHeight: '1.2' }}>Region Admin</div>
         </div>
         <div
           style={{
             width: '34px', height: '34px', borderRadius: '50%', flexShrink: 0,
-            background: open ? 'rgba(59,130,246,0.25)' : 'rgba(59,130,246,0.12)',
-            border: `2px solid ${open ? 'rgba(59,130,246,0.6)' : 'rgba(59,130,246,0.28)'}`,
+            background: open ? 'rgba(204,0,0,0.25)' : 'rgba(204,0,0,0.12)',
+            border: `2px solid ${open ? 'rgba(204,0,0,0.6)' : 'rgba(204,0,0,0.28)'}`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: '700', fontSize: '14px', color: '#3B82F6', transition: 'all 0.15s',
+            fontWeight: '700', fontSize: '14px', color: '#CC0000', transition: 'all 0.15s',
           }}
         >
           {initials}
@@ -324,15 +333,15 @@ function ProfileMenu() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div style={{
                 width: '38px', height: '38px', borderRadius: '50%', flexShrink: 0,
-                background: 'rgba(59,130,246,0.12)', border: '2px solid rgba(59,130,246,0.28)',
+                background: 'rgba(204,0,0,0.12)', border: '2px solid rgba(204,0,0,0.28)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontWeight: '700', fontSize: '16px', color: '#3B82F6',
+                fontWeight: '700', fontSize: '16px', color: '#CC0000',
               }}>
                 {initials}
               </div>
               <div style={{ overflow: 'hidden' }}>
                 <div style={{ fontSize: '14px', fontWeight: '700', color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</div>
-                <div style={{ fontSize: '12px', color: '#3B82F6', fontWeight: '600' }}>Region Admin</div>
+                <div style={{ fontSize: '12px', color: '#CC0000', fontWeight: '600' }}>Region Admin</div>
               </div>
             </div>
           </div>
@@ -406,7 +415,7 @@ function MobileBottomNav({ pathname }: { pathname: string }) {
               gap: '4px',
               padding: '10px 2px 12px',
               textDecoration: 'none',
-              color: active ? '#3B82F6' : '#6B7280',
+              color: active ? '#CC0000' : '#6B7280',
               transition: 'color 0.18s',
               WebkitTapHighlightColor: 'transparent',
             }}
@@ -414,9 +423,9 @@ function MobileBottomNav({ pathname }: { pathname: string }) {
             <div
               className="bottom-nav-pill"
               style={{
-                background: active ? 'rgba(59,130,246,0.15)' : 'transparent',
-                borderColor: active ? 'rgba(59,130,246,0.22)' : 'transparent',
-                boxShadow: active ? '0 0 14px rgba(59,130,246,0.28)' : 'none',
+                background: active ? 'rgba(204,0,0,0.15)' : 'transparent',
+                borderColor: active ? 'rgba(204,0,0,0.22)' : 'transparent',
+                boxShadow: active ? '0 0 14px rgba(204,0,0,0.28)' : 'none',
               }}
             >
               <item.icon size={21} strokeWidth={active ? 2.2 : 1.8} />
@@ -501,7 +510,7 @@ export default function RegionLayout({ children }: { children: React.ReactNode }
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#3B82F6' }} />
+            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#CC0000' }} />
             <span style={{ fontSize: '12px', color: '#6B7280', letterSpacing: '1px', textTransform: 'uppercase' }}>Region Admin Portal</span>
           </div>
           <ProfileMenu />
@@ -527,7 +536,7 @@ export default function RegionLayout({ children }: { children: React.ReactNode }
               left: 0,
               right: 0,
               height: '1px',
-              background: 'linear-gradient(90deg, transparent, rgba(59,130,246,0.5), rgba(201,168,76,0.5), transparent)',
+              background: 'linear-gradient(90deg, transparent, rgba(204,0,0,0.5), rgba(201,168,76,0.5), transparent)',
             }}
           />
           <button
@@ -544,7 +553,7 @@ export default function RegionLayout({ children }: { children: React.ReactNode }
               color: '#ffffff',
             }}
           >
-            BNI <span style={{ color: '#3B82F6' }}>REGION</span>
+            BNI <span style={{ color: '#CC0000' }}>REGION</span>
           </div>
           <ProfileMenu />
         </div>
