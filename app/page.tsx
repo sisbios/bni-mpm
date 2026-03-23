@@ -4,6 +4,8 @@ import { auth } from '@/lib/auth'
 export default async function Page() {
   const session = await auth()
   if (!session) redirect('/login')
-  if (( session.user.accessLevel ?? 'member') === 'member') redirect('/portal')
+  const level = session.user.accessLevel ?? 'member'
+  if (level === 'member') redirect('/portal')
+  if (level === 'regionAdmin' || level === 'platform') redirect('/region')
   redirect('/dashboard')
 }
