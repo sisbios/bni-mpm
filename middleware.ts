@@ -3,24 +3,35 @@ import { NextRequest, NextResponse } from 'next/server'
 /**
  * Multi-tenant middleware
  *
- * BNI_APP_MODE=chapter  → extract chapter slug from subdomain, inject x-chapter-slug
- *                          Block /region routes → redirect to REGION_URL
- * BNI_APP_MODE=region   → never inject chapter slug
- *                          Block /dashboard and /portal routes (chapter-only)
+ * PRIMARY DOMAIN: bnimalappuram.com
+ *   www.bnimalappuram.com          → port 3006  (region admin)
+ *   api.bnimalappuram.com          → port 3006  (BNI API)
+ *   <chapter>.bnimalappuram.com    → port 3005  (chapter dashboard)
  *
- * Domain config is driven entirely by DOMAIN_BASE env var.
- * REGION_URL env var points to the region admin container URL.
+ * BNI_APP_MODE=chapter  (port 3005)
+ *   - Extracts chapter slug from subdomain → injects x-chapter-slug header
+ *   - Hard-blocks /region/** → redirects to REGION_URL
+ *
+ * BNI_APP_MODE=region   (port 3006)
+ *   - Never injects chapter slug
+ *   - Hard-blocks /dashboard and /portal (chapter-only routes)
+ *
+ * All config is driven by env vars — no hardcoded domains in code.
  */
 
 const APP_MODE = process.env.BNI_APP_MODE ?? 'chapter'
-const DOMAIN_BASE = (process.env.DOMAIN_BASE ?? 'sisbios.cloud').split(':')[0]
-const REGION_URL = (process.env.REGION_URL ?? 'https://bnimpm.sisbios.cloud').replace(/\/$/, '')
+const DOMAIN_BASE = (process.env.DOMAIN_BASE ?? 'bnimalappuram.com').split(':')[0]
+const REGION_URL = (process.env.REGION_URL ?? 'https://www.bnimalappuram.com').replace(/\/$/, '')
 
-// Reserved subdomains that are never chapter slugs
-const RESERVED = new Set(['www', 'bni', 'bnimpm', 'region', 'admin', 'api', 'bniapi'])
+// These subdomains are never chapter slugs — they route to non-chapter services
+const RESERVED = new Set([
+  'www', 'api', 'admin', 'region', 'mail', 'smtp', 'ftp',
+  // legacy sisbios.cloud reserved names (kept for safety)
+  'bni', 'bnimpm', 'bniapi',
+])
 
-function getSubdomain(host: string): string | null {
-  if (APP_MODE === 'region') return null
+function getChapterSlug(host: string): string | null {
+  if (APP_MODE === 'region') return null   // region container never injects slug
   const hostname = host.split(':')[0]
   if (!hostname.endsWith('.' + DOMAIN_BASE)) return null
   const sub = hostname.slice(0, -(DOMAIN_BASE.length + 1))
@@ -32,26 +43,26 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const host = request.headers.get('host') ?? ''
 
-  // CHAPTER CONTAINER: hard-block /region/** — redirect to the region admin URL.
-  // This prevents regionAdmin users from accidentally using the region dashboard
-  // through a chapter subdomain, regardless of how they got there.
+  // ── CHAPTER CONTAINER: block /region/** ─────────────────────────────────────
+  // If someone (e.g. a regionAdmin) lands on a chapter subdomain and gets
+  // redirected to /region by page.tsx, this middleware catches it and sends
+  // them to the real region admin URL before any page renders.
   if (APP_MODE === 'chapter' && pathname.startsWith('/region')) {
     const target = new URL(pathname + request.nextUrl.search, REGION_URL)
     return NextResponse.redirect(target, { status: 302 })
   }
 
-  // REGION CONTAINER: block chapter-only paths
+  // ── REGION CONTAINER: block chapter-only paths ──────────────────────────────
   if (APP_MODE === 'region' && (pathname.startsWith('/dashboard') || pathname.startsWith('/portal'))) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Inject x-chapter-slug header for chapter container
-  const slug = getSubdomain(host)
+  // ── Inject chapter slug for multi-tenant routing ────────────────────────────
+  const slug = getChapterSlug(host)
   if (!slug) return NextResponse.next()
 
   const headers = new Headers(request.headers)
   headers.set('x-chapter-slug', slug)
-
   return NextResponse.next({ request: { headers } })
 }
 
