@@ -1,3 +1,4 @@
+import { NON_ADMIN_FILTER } from '@/lib/member-filter'
 import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { db } from '@/lib/db'
@@ -6,7 +7,7 @@ import { computeTrafficScore, TRAFFIC_COLORS, type PalmsRow } from '@/lib/traffi
 
 async function getMembers() {
   return db.user.findMany({
-    where: { isActive: true, role: { not: 'admin' } },
+    where: { isActive: true, ...NON_ADMIN_FILTER },
     orderBy: { name: 'asc' },
     select: {
       id: true,
