@@ -37,7 +37,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (!existing) return NextResponse.json({ error: 'Chapter not found' }, { status: 404 })
 
   const body = await request.json()
-  const { name, slug, city, meetingDay, meetingTime, logoUrl, isActive } = body
+  const { name, slug, city, meetingDay, meetingTime, meetingLocation, meetingFee, visitorFee, logoUrl, isActive } = body
 
   const slugClean = slug ? String(slug).toLowerCase().replace(/[^a-z0-9-]/g, '-') : existing.slug
   if (slugClean !== existing.slug) {
@@ -53,6 +53,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       city: city !== undefined ? (city || null) : existing.city,
       meetingDay: meetingDay !== undefined ? (meetingDay || null) : existing.meetingDay,
       meetingTime: meetingTime !== undefined ? (meetingTime || null) : existing.meetingTime,
+      meetingLocation: meetingLocation !== undefined ? (meetingLocation || null) : (existing as any).meetingLocation,
+      meetingFee: meetingFee !== undefined ? (meetingFee !== null && meetingFee !== '' ? Number(meetingFee) : null) : (existing as any).meetingFee,
+      visitorFee: visitorFee !== undefined ? (visitorFee !== null && visitorFee !== '' ? Number(visitorFee) : null) : (existing as any).visitorFee,
       logoUrl: logoUrl !== undefined ? (logoUrl || null) : existing.logoUrl,
       isActive: typeof isActive === 'boolean' ? isActive : existing.isActive,
     },

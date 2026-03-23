@@ -26,11 +26,14 @@ model Chapter {
   regionId    String
   name        String   // e.g. "Oscar"
   slug        String   @unique // e.g. "oscar"
-  city        String?
-  meetingDay  String?  // e.g. "Tuesday"
-  meetingTime String?  // e.g. "07:00"
-  logoUrl     String?
-  isActive    Boolean  @default(true)
+  city            String?
+  meetingDay      String?  // e.g. "Tuesday"
+  meetingTime     String?  // e.g. "07:00"
+  meetingLocation String?  // e.g. "The Leela Hotel, Banquet Hall"
+  meetingFee      Float?   // member meeting fee in INR
+  visitorFee      Float?   // visitor meeting fee in INR
+  logoUrl         String?
+  isActive        Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
