@@ -10,9 +10,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     ['president', 'vicePresident'].includes(session.user.role ?? '')
   if (!canManage) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
+  const chapterId = session.user.chapterId
+
   const { id } = await params
   const existing = await db.chapterRole.findUnique({ where: { id } })
-  if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  if (!existing || existing.chapterId !== chapterId) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   const { label, color, accessLevel, group, sortOrder } = await request.json()
   const role = await db.chapterRole.update({
@@ -36,13 +38,15 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     ['president', 'vicePresident'].includes(session.user.role ?? '')
   if (!canManage) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
+  const chapterId = session.user.chapterId
+
   const { id } = await params
   const existing = await db.chapterRole.findUnique({ where: { id } })
-  if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  if (!existing || existing.chapterId !== chapterId) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   if (existing.isSystem) return NextResponse.json({ error: 'Cannot delete system role' }, { status: 400 })
 
   const members = await db.user.findMany({
-    where: { role: existing.slug, isActive: true },
+    where: { role: existing.slug, isActive: true, chapterId },
     select: { id: true, name: true, business: true },
   })
   if (members.length > 0) {

@@ -6,6 +6,8 @@ export async function GET(request: Request) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const chapterId = session.user.chapterId
+
   const { searchParams } = new URL(request.url)
   const eventId = searchParams.get('eventId')
 
@@ -14,6 +16,11 @@ export async function GET(request: Request) {
     if (( session.user.accessLevel ?? 'member') === 'member') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
+
+    // Verify the event belongs to this chapter
+    const event = await db.event.findUnique({ where: { id: eventId }, select: { chapterId: true } })
+    if (!event || event.chapterId !== chapterId) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
     const rsvps = await db.eventRSVP.findMany({
       where: { eventId },
       include: {
@@ -39,6 +46,8 @@ export async function POST(request: Request) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const chapterId = session.user.chapterId
+
   const body = await request.json()
   const { eventId, status, notes } = body
 
@@ -50,6 +59,10 @@ export async function POST(request: Request) {
   if (!validStatuses.includes(status)) {
     return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
   }
+
+  // Verify the event belongs to this chapter
+  const event = await db.event.findUnique({ where: { id: eventId }, select: { chapterId: true } })
+  if (!event || event.chapterId !== chapterId) return NextResponse.json({ error: 'Event not found' }, { status: 404 })
 
   const rsvp = await db.eventRSVP.upsert({
     where: { userId_eventId: { userId: session.user.id, eventId } },

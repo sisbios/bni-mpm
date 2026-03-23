@@ -10,6 +10,8 @@ export async function GET(
   const session = await auth()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const chapterId = session.user.chapterId
+
   const { id } = await params
 
   // Members can only view their own profile
@@ -31,13 +33,14 @@ export async function GET(
       isActive: true,
       createdAt: true,
       updatedAt: true,
+      chapterId: true,
       _count: {
         select: { achievements: true, tasks: true, contactSphere: true },
       },
     },
   })
 
-  if (!user) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  if (!user || user.chapterId !== chapterId) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   return NextResponse.json(user)
 }
@@ -49,11 +52,19 @@ export async function PATCH(
   const session = await auth()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const chapterId = session.user.chapterId
+
   const { id } = await params
 
   // Members can only update their own profile (limited fields)
   if (( session.user.accessLevel ?? 'member') === 'member' && session.user.id !== id) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  // Non-members: verify the target user belongs to this chapter
+  if (( session.user.accessLevel ?? 'member') !== 'member') {
+    const target = await db.user.findUnique({ where: { id }, select: { chapterId: true } })
+    if (!target || target.chapterId !== chapterId) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
 
   const body = await request.json()
@@ -117,7 +128,12 @@ export async function DELETE(
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   if (( session.user.accessLevel ?? 'member') === 'member') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
+  const chapterId = session.user.chapterId
+
   const { id } = await params
+
+  const target = await db.user.findUnique({ where: { id }, select: { chapterId: true } })
+  if (!target || target.chapterId !== chapterId) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   // Soft delete
   await db.user.update({

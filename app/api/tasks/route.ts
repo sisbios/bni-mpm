@@ -6,6 +6,8 @@ export async function GET(request: Request) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const chapterId = session.user.chapterId
+
   const { searchParams } = new URL(request.url)
   const week = searchParams.get('week')
   const userId = searchParams.get('userId')
@@ -15,6 +17,7 @@ export async function GET(request: Request) {
 
   const tasks = await db.weeklyTask.findMany({
     where: {
+      chapterId,
       ...(week ? { week } : {}),
       ...(targetUserId ? { userId: targetUserId } : {}),
     },
@@ -30,6 +33,8 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const chapterId = session.user.chapterId
 
   const body = await request.json()
 
@@ -48,6 +53,7 @@ export async function POST(request: Request) {
         status: 'pending',
         notes: t.notes || null,
         allocatedBy: session.user.id,
+        chapterId,
       })),
     })
     return NextResponse.json({ created: tasks.count }, { status: 201 })
@@ -71,6 +77,7 @@ export async function POST(request: Request) {
       phone: phone || null,
       notes: notes || null,
       allocatedBy: ( session.user.accessLevel ?? 'member') !== 'member' ? session.user.id : null,
+      chapterId,
     },
     include: {
       user: { select: { id: true, name: true } },

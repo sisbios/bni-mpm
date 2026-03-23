@@ -8,7 +8,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if ((session.user.accessLevel ?? 'member') === 'member')
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
+  const chapterId = session.user.chapterId
+
   const { id } = await params
+
+  const existing = await db.meetingSlot.findUnique({ where: { id } })
+  if (!existing || existing.chapterId !== chapterId) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
   const body = await request.json()
   const { assignedUserId, topic, status } = body
 

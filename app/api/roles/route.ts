@@ -5,7 +5,13 @@ import { NextResponse } from 'next/server'
 export async function GET() {
   const session = await auth()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const roles = await db.chapterRole.findMany({ orderBy: [{ sortOrder: 'asc' }, { label: 'asc' }] })
+
+  const chapterId = session.user.chapterId
+
+  const roles = await db.chapterRole.findMany({
+    where: { chapterId },
+    orderBy: [{ sortOrder: 'asc' }, { label: 'asc' }],
+  })
   return NextResponse.json(roles)
 }
 
@@ -16,6 +22,8 @@ export async function POST(request: Request) {
     (session.user.accessLevel ?? 'member') === 'superadmin' ||
     ['president', 'vicePresident'].includes(session.user.role ?? '')
   if (!canManage) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+  const chapterId = session.user.chapterId
 
   const { slug, label, color, accessLevel, group, sortOrder } = await request.json()
   if (!slug || !label) return NextResponse.json({ error: 'slug and label required' }, { status: 400 })
@@ -28,6 +36,7 @@ export async function POST(request: Request) {
       group: group ?? 'member',
       sortOrder: sortOrder ?? 99,
       isSystem: false,
+      chapterId,
     },
   })
   return NextResponse.json(role, { status: 201 })

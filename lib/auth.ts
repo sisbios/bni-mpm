@@ -36,7 +36,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const valid = await bcrypt.compare(credentials.password as string, user.password)
         if (!valid) return null
         const accessLevel = await getAccessLevel(user.role)
-        return { id: user.id, email: user.email, name: user.name, role: user.role, accessLevel }
+        return {
+          id: user.id, email: user.email, name: user.name,
+          role: user.role, accessLevel,
+          chapterId: user.chapterId ?? null,
+          regionId: user.regionId ?? null,
+        }
       },
     }),
     Credentials({
@@ -66,7 +71,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           })
           if (!user) return null
           const accessLevel = await getAccessLevel(user.role)
-          return { id: user.id, email: user.email, name: user.name, role: user.role, accessLevel }
+          return {
+            id: user.id, email: user.email, name: user.name,
+            role: user.role, accessLevel,
+            chapterId: user.chapterId ?? null,
+            regionId: user.regionId ?? null,
+          }
         } catch (e) {
           console.error('Firebase OTP auth error:', e)
           return null
@@ -80,8 +90,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.id = user.id
         token.role = (user as any).role
         token.accessLevel = (user as any).accessLevel ?? deriveAccessLevel((user as any).role ?? 'member')
+        token.chapterId = (user as any).chapterId ?? null
+        token.regionId = (user as any).regionId ?? null
       }
-      // Backfill accessLevel for existing sessions that don't have it
       if (!token.accessLevel && token.role) {
         token.accessLevel = deriveAccessLevel(token.role as string)
       }
@@ -92,6 +103,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.id = token.id as string
         session.user.role = token.role as string
         session.user.accessLevel = (token.accessLevel as string) ?? deriveAccessLevel(token.role as string)
+        session.user.chapterId = (token.chapterId as string | null) ?? null
+        session.user.regionId = (token.regionId as string | null) ?? null
       }
       return session
     },
