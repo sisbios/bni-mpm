@@ -1,0 +1,290 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  phone     String?
+  role      String   @default("member") // president | admin | member
+  business  String?
+  category  String?
+  avatar            String?
+  professionalPhoto String?
+  address           String?
+  isActive  Boolean  @default(true)
+  membershipValidTill DateTime?
+  joinedAt  DateTime?        // manually editable joining date; falls back to createdAt for display
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  rsvps         EventRSVP[]
+  tasks         WeeklyTask[]
+  achievements  GreenAchievement[]
+  contactSphere ContactSphere[]
+  auditLogs     AuditLog[]
+  meetingSlots  MeetingSlot[]
+  palmsEntries  PalmsEntry[]
+  memberPins    MemberPin[]
+  visitors      Visitor[]   @relation("VisitorReferrer")
+  businessGoals BusinessGoal[]
+}
+
+model Event {
+  id        String   @id @default(cuid())
+  date      DateTime
+  title     String
+  subtitle  String?
+  tags      String   @default("[]") // JSON array of tag labels
+  colors    String   @default("[]") // JSON array of hex colors
+  eventType String   @default("chapter") // chapter | regional | training | social | trip | international
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  rsvps        EventRSVP[]
+  meetingSlots MeetingSlot[]
+
+  @@index([date])
+}
+
+model EventRSVP {
+  id        String   @id @default(cuid())
+  userId    String
+  eventId   String
+  status    String   @default("pending") // pending | confirmed | declined | maybe
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id])
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@unique([userId, eventId])
+}
+
+model WeeklyTask {
+  id          String   @id @default(cuid())
+  userId      String
+  week        String   // ISO week string e.g. "2026-W15"
+  taskType    String   @default("call") // call | followup | visit | referral
+  contactName String
+  phone       String?
+  status      String   @default("pending") // pending | done | no-answer | callback
+  notes       String?
+  allocatedBy String?
+  contactSphereId String?
+  contributorId   String?
+  contributorName String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+  contactSphereEntry ContactSphere? @relation(fields: [contactSphereId], references: [id], onDelete: SetNull)
+
+  @@index([userId, week])
+}
+
+model GreenAchievement {
+  id          String   @id @default(cuid())
+  userId      String
+  category    String   // referral | testimonial | one-to-one | visitor | tyfcb | training
+  description String?
+  points      Int      @default(1)
+  date        DateTime @default(now())
+  verified    Boolean  @default(false)
+  verifiedBy  String?
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model BusinessGoal {
+  id          String    @id @default(cuid())
+  userId      String
+  type        String    // 'achievement' | 'milestone'
+  title       String
+  description String?
+  category    String    @default("other") // sales | growth | team | product | award | other
+  status      String    @default("upcoming") // upcoming | in_progress | achieved
+  targetDate  DateTime?
+  achievedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model ContactSphere {
+  id           String   @id @default(cuid())
+  userId       String
+  contactName  String
+  phone        String?
+  email        String?
+  business     String?
+  relationship String? // friend | family | colleague | client | vendor | neighbor
+  category     String? // prospect | personal | business | professional | neighbor
+  address      String?
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id])
+  allocations WeeklyTask[]
+
+  @@index([userId])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String
+  entity    String
+  entityId  String?
+  details   String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model ChapterSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model ChapterRole {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  label       String
+  color       String   @default("#9CA3AF")
+  accessLevel String   @default("member") // superadmin | officer | member
+  group       String   @default("member") // superadmin | headtable | committee | member
+  sortOrder   Int      @default(99)
+  isSystem    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model PalmsEntry {
+  id          String   @id @default(cuid())
+  userId      String
+  week        String   // ISO week "2026-W12"
+  weekDate    DateTime // Monday of that week
+
+  // Attendance
+  attended    Boolean  @default(false)
+  substitute  Boolean  @default(false) // sent a substitute
+  late        Boolean  @default(false) // late arrival or early departure
+  medical     Boolean  @default(false) // medical absence — exempt from absence penalty
+
+  // Activities
+  referrals    Int      @default(0)
+  visitors     Int      @default(0)
+  testimonials Int      @default(0)
+  oneToOnes    Int      @default(0) // kept for legacy / 1-2-1 tracking
+  ceus         Int      @default(0) // training sessions
+  tyfcbAmount  Float    @default(0) // in rupees
+
+  notes       String?
+  createdBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, week])
+  @@index([userId])
+  @@index([week])
+}
+
+model BniPin {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  label       String
+  description String?
+  icon        String   @default("🏅")
+  color       String   @default("#C9A84C")
+  isSystem    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+
+  memberPins MemberPin[]
+}
+
+model MemberPin {
+  id         String   @id @default(cuid())
+  userId     String
+  pinSlug    String
+  awardedBy  String?
+  awardedAt  DateTime @default(now())
+  notes      String?
+
+  user User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pin  BniPin @relation(fields: [pinSlug], references: [slug], onDelete: Cascade)
+
+  @@unique([userId, pinSlug])
+  @@index([userId])
+}
+
+model Visitor {
+  id           String   @id @default(cuid())
+  name         String
+  phone        String?
+  email        String?
+  business     String?
+  category     String?
+
+  referrerId   String           // member who brought them
+  visitDate    DateTime
+  week         String           // ISO week "2026-W12"
+  weekDate     DateTime         // Monday of that week
+
+  eoiSubmitted Boolean  @default(false)
+  eoiDate      DateTime?
+
+  fromContactId String?          // ContactSphere.id if imported from contact pool
+
+  notes        String?
+  createdBy    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  referrer User @relation("VisitorReferrer", fields: [referrerId], references: [id])
+
+  @@index([referrerId])
+  @@index([week])
+}
+
+model MeetingSlot {
+  id               String   @id @default(cuid())
+  eventId          String
+  slotType         String   // 'edu_slot' | 'feature_presentation'
+  slotNumber       Int      @default(1) // 1 for edu; 1 or 2 for feature presentations
+  assignedUserId   String?
+  assignedUserName String?
+  topic            String?
+  status           String   @default("pending") // pending | confirmed | completed
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  event        Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  assignedUser User? @relation(fields: [assignedUserId], references: [id], onDelete: SetNull)
+
+  @@index([eventId])
+  @@index([assignedUserId])
+}

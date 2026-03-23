@@ -1,0 +1,7 @@
+.next
+node_modules
+.git
+*.log
+.env.local
+.env.development
+README.md
