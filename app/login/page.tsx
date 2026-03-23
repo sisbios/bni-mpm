@@ -12,8 +12,8 @@ export default async function LoginPage() {
   if (APP_MODE === 'region') {
     return (
       <LoginClient
-        title="REGION ADMIN"
-        subtitle="BNI Malappuram Region Portal"
+        title="BNI MALAPPURAM"
+        subtitle="Regional Portal — Admin Sign In"
         accentColor="#CC0000"
       />
     )
