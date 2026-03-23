@@ -47,6 +47,8 @@ export async function PATCH(
   const body = await request.json()
   const { date, title, subtitle, tags, colors, eventType, isActive } = body
 
+  if (eventType === 'regional') return NextResponse.json({ error: 'Regional events must be created from the Region dashboard' }, { status: 400 })
+
   const updateData: Record<string, unknown> = {}
   if (date !== undefined) updateData.date = new Date(date)
   if (title !== undefined) updateData.title = title

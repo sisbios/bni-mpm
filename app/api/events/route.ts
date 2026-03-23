@@ -52,6 +52,7 @@ export async function POST(request: Request) {
   const { date, title, subtitle, tags, colors, eventType, bookingRequired } = body
 
   if (!date || !title) return NextResponse.json({ error: 'Date and title are required' }, { status: 400 })
+  if (eventType === 'regional') return NextResponse.json({ error: 'Regional events must be created from the Region dashboard' }, { status: 400 })
 
   const event = await db.event.create({
     data: {

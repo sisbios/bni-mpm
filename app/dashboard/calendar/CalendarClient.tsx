@@ -19,11 +19,11 @@ type Event = {
 
 const EVENT_TYPES = [
   { value: 'chapter',       label: 'Chapter Meeting',  color: '#3B82F6' },
-  { value: 'regional',      label: 'Regional Event',   color: '#8B5CF6' },
   { value: 'training',      label: 'Training',         color: '#10B981' },
   { value: 'social',        label: 'Social',           color: '#F59E0B' },
   { value: 'trip',          label: 'Trip',             color: '#EC4899' },
   { value: 'international', label: 'International',    color: '#C9A84C' },
+  // 'regional' is intentionally excluded — regional events are created from the Region dashboard only
 ]
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
