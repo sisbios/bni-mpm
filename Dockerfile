@@ -1,15 +1,4 @@
-FROM node:20-alpine AS base
-
-# Install Chromium and system dependencies for Puppeteer
-RUN apk add --no-cache \
-    chromium \
-    nss \
-    freetype \
-    harfbuzz \
-    ca-certificates \
-    ttf-freefont \
-    openssl \
-    libc6-compat
+FROM bni-base:latest AS base
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
