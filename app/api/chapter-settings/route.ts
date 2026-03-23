@@ -33,11 +33,12 @@ export async function POST(request: Request) {
 
   for (const [key, value] of Object.entries(body)) {
     if (typeof value !== 'string') continue
-    await db.chapterSetting.upsert({
-      where: { key },
-      update: { value },
-      create: { key, value },
-    })
+    const existing = await db.chapterSetting.findFirst({ where: { key } })
+    if (existing) {
+      await db.chapterSetting.update({ where: { id: existing.id }, data: { value } })
+    } else {
+      await db.chapterSetting.create({ data: { key, value } })
+    }
     results[key] = value
   }
 
