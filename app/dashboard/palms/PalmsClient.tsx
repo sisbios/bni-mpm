@@ -2,7 +2,7 @@
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { computeTrafficScore, TRAFFIC_COLORS, type PalmsRow } from '@/lib/traffic-light'
-import { BarChart2, ChevronDown, X, Check } from 'lucide-react'
+import { BarChart2, ChevronDown, X, Check, Users, Loader2 } from 'lucide-react'
 
 type Member = {
   id: string
@@ -110,6 +110,7 @@ export default function PalmsClient({ members, palmsThisWeek, allPalms, currentW
   const [editingUserId, setEditingUserId] = useState<string | null>(null)
   const [editState, setEditState] = useState<RowEditState>(emptyEdit())
   const [saving, setSaving] = useState(false)
+  const [bulkLoading, setBulkLoading] = useState(false)
 
   async function changeWeek(week: string) {
     setSelectedWeek(week)
@@ -185,6 +186,39 @@ export default function PalmsClient({ members, palmsThisWeek, allPalms, currentW
     setEditState(emptyEdit())
   }
 
+  async function markAllPresent() {
+    setBulkLoading(true)
+    setEditingUserId(null)
+    const weekInfo = weeks.find((w) => w.week === selectedWeek)
+    const monday = weekInfo?.monday ?? new Date()
+    let successCount = 0
+    const updates = new Map(weekEntries)
+    for (const member of members) {
+      try {
+        const res = await fetch('/api/palms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: member.id,
+            week: selectedWeek,
+            weekDate: monday.toISOString(),
+            attended: true, substitute: false, late: false, medical: false,
+            testimonials: weekEntries.get(member.id)?.testimonials ?? 0,
+            notes: weekEntries.get(member.id)?.notes ?? null,
+          }),
+        })
+        if (res.ok) {
+          const saved: PalmsEntry = await res.json()
+          updates.set(member.id, saved)
+          successCount++
+        }
+      } catch { /* skip failed */ }
+    }
+    setWeekEntries(updates)
+    setBulkLoading(false)
+    toast.success(`${successCount} members marked present — edit individuals to correct`)
+  }
+
   const enteredThisWeek = weekEntries.size
   const greenCount  = [...memberScores.values()].filter((s) => s.color === 'green').length
   const yellowCount = [...memberScores.values()].filter((s) => s.color === 'yellow').length
@@ -248,6 +282,22 @@ export default function PalmsClient({ members, palmsThisWeek, allPalms, currentW
             <ChevronDown size={14} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: '#6B7280', pointerEvents: 'none' }} />
           </div>
           <span style={{ fontSize: '13px', color: '#6B7280' }}>{enteredThisWeek}/{members.length} entered</span>
+          <button
+            onClick={markAllPresent}
+            disabled={bulkLoading}
+            style={{
+              marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px',
+              padding: '7px 14px', borderRadius: '7px', border: '1px solid rgba(16,185,129,0.3)',
+              background: bulkLoading ? 'rgba(16,185,129,0.06)' : 'rgba(16,185,129,0.1)',
+              color: bulkLoading ? '#4B5563' : '#10B981', cursor: bulkLoading ? 'not-allowed' : 'pointer',
+              fontSize: '12px', fontWeight: '700', transition: 'all 0.12s', whiteSpace: 'nowrap',
+            }}
+          >
+            {bulkLoading
+              ? <><Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> Marking...</>
+              : <><Users size={13} /> Mark All Present</>
+            }
+          </button>
         </div>
 
         {/* Table */}
