@@ -3,7 +3,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Search, Plus, Upload, Users, Trash2, Eye, Phone, AlertTriangle } from 'lucide-react'
+import { Search, Plus, Upload, Users, Trash2, Eye, Phone, AlertTriangle, X } from 'lucide-react'
 import { TRAFFIC_COLORS } from '@/lib/traffic-light'
 
 type Member = {
@@ -781,26 +781,13 @@ export default function MembersClient({
   )
 }
 
-function AddMemberModal({
-  onClose,
-  onSuccess,
-}: {
+function AddMemberModal({ onClose, onSuccess }: {
   onClose: () => void
   onSuccess: (member: Omit<Member, '_count'>) => void
 }) {
   const [loading, setLoading] = useState(false)
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    phone: '',   // stores 10-digit number; +91 prepended on submit
-    business: '',
-    category: '',
-    role: 'member',
-  })
-
-  function set(key: string, val: string) {
-    setForm((p) => ({ ...p, [key]: val }))
-  }
+  const [form, setForm] = useState({ name: '', email: '', phone: '', business: '', category: '', role: 'member' })
+  function set(k: string, v: string) { setForm((p) => ({ ...p, [k]: v })) }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -808,169 +795,86 @@ function AddMemberModal({
     const res = await fetch('/api/members', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...form,
-        phone: form.phone ? `+91${form.phone.replace(/\D/g, '')}` : '',
-      }),
+      body: JSON.stringify({ ...form, phone: form.phone ? `+91${form.phone.replace(/\D/g, '')}` : '' }),
     })
     setLoading(false)
-    if (res.ok) {
-      const data = await res.json()
-      onSuccess(data)
-    } else {
-      const err = await res.json()
-      toast.error(err.error || 'Failed to create member')
-    }
+    if (res.ok) onSuccess(await res.json())
+    else { const err = await res.json(); toast.error(err.error || 'Failed to create member') }
   }
 
-  const inputStyle: React.CSSProperties = {
-    width: '100%',
-    padding: '11px 14px',
-    borderRadius: '8px',
-    border: '1px solid rgba(255,255,255,0.07)',
-    backgroundColor: 'rgba(6,10,20,0.6)',
-    color: '#ffffff',
-    fontSize: '17px',
-    outline: 'none',
-    boxSizing: 'border-box',
-    fontFamily: 'var(--font-montserrat), sans-serif',
+  const inp: React.CSSProperties = {
+    width: '100%', padding: '8px 10px', borderRadius: '7px',
+    border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(6,10,20,0.6)',
+    color: '#ffffff', fontSize: '13px', outline: 'none', boxSizing: 'border-box',
   }
+  const lbl: React.CSSProperties = { display: 'block', fontSize: '10px', color: '#6B7280', marginBottom: '4px', fontWeight: '600', letterSpacing: '0.5px', textTransform: 'uppercase' }
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        backgroundColor: 'rgba(0,0,0,0.7)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 100,
-        padding: '20px',
-      }}
-      onClick={onClose}
-    >
-      <div
-        style={{
-          background: 'rgba(10,15,28,0.90)',
-          backdropFilter: 'blur(28px) saturate(160%)',
-          WebkitBackdropFilter: 'blur(28px) saturate(160%)',
-          borderRadius: '12px',
-          border: '1px solid rgba(255,255,255,0.07)',
-          padding: '32px',
-          width: '100%',
-          maxWidth: '520px',
-          maxHeight: '90vh',
-          overflowY: 'auto',
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h2
-          style={{
-            fontFamily: 'var(--font-bebas), sans-serif',
-            fontSize: '22px',
-            letterSpacing: '2px',
-            color: '#ffffff',
-            marginBottom: '24px',
-          }}
-        >
-          ADD NEW MEMBER
-        </h2>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 100, padding: '0' }}
+      onClick={onClose}>
+      <div style={{ background: 'rgba(10,15,28,0.98)', backdropFilter: 'blur(28px) saturate(160%)', WebkitBackdropFilter: 'blur(28px) saturate(160%)', borderRadius: '16px 16px 0 0', border: '1px solid rgba(255,255,255,0.08)', borderBottom: 'none', padding: '20px 20px 28px', width: '100%', maxWidth: '480px', maxHeight: '92vh', overflowY: 'auto' }}
+        onClick={(e) => e.stopPropagation()}>
+
+        {/* Handle bar + header */}
+        <div style={{ width: '36px', height: '4px', borderRadius: '2px', background: 'rgba(255,255,255,0.15)', margin: '0 auto 16px' }} />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <h2 style={{ fontFamily: 'var(--font-bebas), sans-serif', fontSize: '18px', letterSpacing: '2px', color: '#ffffff', margin: 0 }}>ADD MEMBER</h2>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#4B5563', cursor: 'pointer', padding: '4px' }}>
+            <X size={16} />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {/* Name + Email */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '17px', color: '#6B7280', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                Full Name *
-              </label>
-              <input style={inputStyle} value={form.name} onChange={(e) => set('name', e.target.value)} required placeholder="John Smith" />
+              <label style={lbl}>Full Name *</label>
+              <input style={inp} value={form.name} onChange={(e) => set('name', e.target.value)} required placeholder="John Smith" />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '17px', color: '#6B7280', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                Email *
-              </label>
-              <input style={inputStyle} type="email" value={form.email} onChange={(e) => set('email', e.target.value)} required placeholder="john@example.com" />
+              <label style={lbl}>Email *</label>
+              <input style={inp} type="email" value={form.email} onChange={(e) => set('email', e.target.value)} required placeholder="john@example.com" />
             </div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+
+          {/* Phone + Role */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '17px', color: '#6B7280', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                Phone
-              </label>
-              <div style={{ display: 'flex', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(6,10,20,0.6)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', padding: '0 10px', borderRight: '1px solid rgba(255,255,255,0.07)', color: '#9CA3AF', fontSize: '13px', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                  🇮🇳 +91
-                </div>
-                <input
-                  type="tel"
-                  style={{ ...inputStyle, border: 'none', background: 'transparent', paddingLeft: '10px', flex: 1 }}
-                  value={form.phone}
-                  onChange={(e) => set('phone', e.target.value.replace(/\D/g, '').slice(0, 10))}
-                  placeholder="98765 43210"
-                  maxLength={10}
-                />
+              <label style={lbl}>Phone</label>
+              <div style={{ display: 'flex', borderRadius: '7px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(6,10,20,0.6)' }}>
+                <span style={{ display: 'flex', alignItems: 'center', padding: '0 8px', borderRight: '1px solid rgba(255,255,255,0.07)', color: '#6B7280', fontSize: '12px', whiteSpace: 'nowrap', flexShrink: 0 }}>🇮🇳 +91</span>
+                <input type="tel" style={{ ...inp, border: 'none', background: 'transparent', paddingLeft: '8px', flex: 1, width: 'auto' }}
+                  value={form.phone} onChange={(e) => set('phone', e.target.value.replace(/\D/g, '').slice(0, 10))}
+                  placeholder="98765 43210" maxLength={10} />
               </div>
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '17px', color: '#6B7280', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                Role
-              </label>
-              <select
-                style={{ ...inputStyle, cursor: 'pointer' }}
-                value={form.role}
-                onChange={(e) => set('role', e.target.value)}
-              >
+              <label style={lbl}>Role</label>
+              <select style={{ ...inp, cursor: 'pointer', colorScheme: 'dark', background: '#0d1324' }} value={form.role} onChange={(e) => set('role', e.target.value)}>
                 <option value="member">Member</option>
                 <option value="admin">Admin</option>
                 <option value="president">President</option>
               </select>
             </div>
           </div>
-          <div>
-            <label style={{ display: 'block', fontSize: '17px', color: '#6B7280', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-              Business Name
-            </label>
-            <input style={inputStyle} value={form.business} onChange={(e) => set('business', e.target.value)} placeholder="Acme Corp" />
+
+          {/* Business + Category */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            <div>
+              <label style={lbl}>Business</label>
+              <input style={inp} value={form.business} onChange={(e) => set('business', e.target.value)} placeholder="Acme Corp" />
+            </div>
+            <div>
+              <label style={lbl}>Category</label>
+              <input style={inp} value={form.category} onChange={(e) => set('category', e.target.value)} placeholder="Real Estate…" />
+            </div>
           </div>
-          <div>
-            <label style={{ display: 'block', fontSize: '17px', color: '#6B7280', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-              Business Category
-            </label>
-            <input style={inputStyle} value={form.category} onChange={(e) => set('category', e.target.value)} placeholder="Real Estate, Finance, etc." />
-          </div>
-          <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
-            <button
-              type="button"
-              onClick={onClose}
-              style={{
-                flex: 1,
-                padding: '12px',
-                borderRadius: '8px',
-                border: '1px solid rgba(255,255,255,0.07)',
-                backgroundColor: 'transparent',
-                color: '#9CA3AF',
-                fontSize: '17px',
-                cursor: 'pointer',
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                flex: 1,
-                padding: '12px',
-                borderRadius: '8px',
-                border: 'none',
-                background: 'linear-gradient(135deg, #CC0000, #990000)',
-                color: '#ffffff',
-                fontSize: '17px',
-                fontWeight: '700',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                opacity: loading ? 0.7 : 1,
-              }}
-            >
-              {loading ? 'Adding...' : 'Add Member'}
+
+          {/* Buttons */}
+          <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+            <button type="button" onClick={onClose} style={{ flex: 1, padding: '10px', borderRadius: '7px', border: '1px solid rgba(255,255,255,0.07)', background: 'transparent', color: '#6B7280', fontSize: '13px', cursor: 'pointer' }}>Cancel</button>
+            <button type="submit" disabled={loading} style={{ flex: 2, padding: '10px', borderRadius: '7px', border: 'none', background: loading ? 'rgba(153,0,0,0.6)' : 'linear-gradient(135deg, #CC0000, #990000)', color: '#fff', fontSize: '13px', fontWeight: '700', cursor: loading ? 'not-allowed' : 'pointer' }}>
+              {loading ? 'Adding…' : 'Add Member'}
             </button>
           </div>
         </form>
