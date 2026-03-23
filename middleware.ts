@@ -21,7 +21,9 @@ function getSubdomain(host: string): string | null {
   const hostname = host.split(':')[0]
   if (!hostname.endsWith('.' + DOMAIN_BASE)) return null
   const sub = hostname.slice(0, -(DOMAIN_BASE.length + 1))
-  if (!sub || sub === 'www') return null
+  // Reserved subdomains — no chapter context
+  const RESERVED = new Set(['www', 'bni', 'region', 'admin', 'api'])
+  if (!sub || RESERVED.has(sub)) return null
   return sub
 }
 
