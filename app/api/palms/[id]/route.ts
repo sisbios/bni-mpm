@@ -12,7 +12,13 @@ export async function PATCH(
   const accessLevel = session.user.accessLevel ?? 'member'
   if (accessLevel === 'member') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
+  const chapterId = session.user.chapterId
+
   const { id } = await params
+
+  const existing = await db.palmsEntry.findUnique({ where: { id } })
+  if (!existing || existing.chapterId !== chapterId) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
   const body = await request.json()
   const { attended, substitute, late, medical, referrals, visitors, testimonials, oneToOnes, ceus, tyfcbAmount, notes } = body
 
@@ -49,7 +55,13 @@ export async function DELETE(
   const accessLevel = session.user.accessLevel ?? 'member'
   if (accessLevel === 'member') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
+  const chapterId = session.user.chapterId
+
   const { id } = await params
+
+  const existing = await db.palmsEntry.findUnique({ where: { id } })
+  if (!existing || existing.chapterId !== chapterId) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
   await db.palmsEntry.delete({ where: { id } })
   return NextResponse.json({ success: true })
 }

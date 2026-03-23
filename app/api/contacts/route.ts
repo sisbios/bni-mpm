@@ -6,6 +6,8 @@ export async function GET(request: Request) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const chapterId = session.user.chapterId
+
   const { searchParams } = new URL(request.url)
   const userId = searchParams.get('userId')
 
@@ -13,7 +15,7 @@ export async function GET(request: Request) {
   const targetUserId = ( session.user.accessLevel ?? 'member') === 'member' ? session.user.id : (userId || session.user.id)
 
   const contacts = await db.contactSphere.findMany({
-    where: { userId: targetUserId },
+    where: { userId: targetUserId, chapterId },
     orderBy: { contactName: 'asc' },
   })
 
@@ -23,6 +25,8 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const chapterId = session.user.chapterId
 
   const body = await request.json()
   const { contactName, phone, email, business, relationship, category, address, notes, userId } = body
@@ -45,6 +49,7 @@ export async function POST(request: Request) {
       category: category || null,
       address: address || null,
       notes: notes || null,
+      chapterId,
     },
   })
 

@@ -6,8 +6,10 @@ export async function GET() {
   const session = await auth()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const chapterId = session.user.chapterId
+
   const goals = await (db as any).businessGoal.findMany({
-    where: { userId: session.user.id },
+    where: { userId: session.user.id, chapterId },
     orderBy: [{ status: 'asc' }, { createdAt: 'desc' }],
   })
   return NextResponse.json(goals)
@@ -16,6 +18,8 @@ export async function GET() {
 export async function POST(request: Request) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const chapterId = session.user.chapterId
 
   const body = await request.json()
   const { type, title, description, category, status, targetDate, achievedAt } = body
@@ -32,6 +36,7 @@ export async function POST(request: Request) {
       targetDate: targetDate ? new Date(targetDate) : null,
       achievedAt: achievedAt ? new Date(achievedAt) : null,
       updatedAt: new Date(),
+      chapterId,
     },
   })
   return NextResponse.json(goal, { status: 201 })

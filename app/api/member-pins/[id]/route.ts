@@ -16,7 +16,13 @@ export async function DELETE(
 
   if (!canRevoke) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
+  const chapterId = session.user.chapterId
+
   const { id } = await params
+
+  const existing = await db.memberPin.findUnique({ where: { id } })
+  if (!existing || existing.chapterId !== chapterId) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
   await db.memberPin.delete({ where: { id } })
   return NextResponse.json({ success: true })
 }

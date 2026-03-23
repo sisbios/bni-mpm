@@ -41,12 +41,15 @@ export async function GET(request: Request) {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   if ((session.user.accessLevel ?? 'member') === 'member') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
+  const chapterId = session.user.chapterId
+
   const { searchParams } = new URL(request.url)
   const week = searchParams.get('week')
   const referrerId = searchParams.get('referrerId')
 
   const visitors = await (db as any).visitor.findMany({
     where: {
+      chapterId,
       ...(week ? { week } : {}),
       ...(referrerId ? { referrerId } : {}),
     },
@@ -69,6 +72,8 @@ export async function POST(request: Request) {
     ['president', 'vicePresident'].includes(session.user.role ?? '')
 
   if (!canEdit) return NextResponse.json({ error: 'Forbidden — head table only' }, { status: 403 })
+
+  const chapterId = session.user.chapterId
 
   const body = await request.json()
   const { name, phone, email, business, category, referrerId, visitDate, eoiSubmitted, fromContactId, notes } = body
@@ -96,6 +101,7 @@ export async function POST(request: Request) {
       fromContactId: fromContactId || null,
       notes: notes || null,
       createdBy: session.user.id,
+      chapterId,
     },
     include: {
       referrer: { select: { id: true, name: true, business: true, role: true } },

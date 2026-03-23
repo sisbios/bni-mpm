@@ -43,13 +43,15 @@ export async function PATCH(
     ['president', 'vicePresident'].includes(session.user.role ?? '')
   if (!canEdit) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
+  const chapterId = session.user.chapterId
+
   const { id } = await params
   const body = await request.json()
   const { name, phone, email, business, category, referrerId, visitDate, eoiSubmitted, eoiDate, notes } = body
 
   // Fetch current record to know old week for sync
   const current = await (db as any).visitor.findUnique({ where: { id } })
-  if (!current) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  if (!current || current.chapterId !== chapterId) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   const updateData: Record<string, unknown> = {}
   if (name !== undefined) updateData.name = name
@@ -105,9 +107,11 @@ export async function DELETE(
     ['president', 'vicePresident'].includes(session.user.role ?? '')
   if (!canEdit) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
+  const chapterId = session.user.chapterId
+
   const { id } = await params
   const visitor = await (db as any).visitor.findUnique({ where: { id } })
-  if (!visitor) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  if (!visitor || visitor.chapterId !== chapterId) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   await (db as any).visitor.delete({ where: { id } })
   await syncVisitorCount(visitor.referrerId as string, visitor.week as string, visitor.weekDate as Date)
