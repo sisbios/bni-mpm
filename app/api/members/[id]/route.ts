@@ -63,8 +63,12 @@ export async function PATCH(
 
   // Non-members: verify the target user belongs to this chapter
   if (( session.user.accessLevel ?? 'member') !== 'member') {
-    const target = await db.user.findUnique({ where: { id }, select: { chapterId: true } })
+    const target = await db.user.findUnique({ where: { id }, select: { chapterId: true, accessLevel: true } })
     if (!target || target.chapterId !== chapterId) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    // Platform admin accounts can only be edited by other platform users
+    if (target.accessLevel === 'platform' && session.user.accessLevel !== 'platform') {
+      return NextResponse.json({ error: 'Cannot modify platform admin accounts' }, { status: 403 })
+    }
   }
 
   const body = await request.json()
@@ -132,8 +136,11 @@ export async function DELETE(
 
   const { id } = await params
 
-  const target = await db.user.findUnique({ where: { id }, select: { chapterId: true } })
+  const target = await db.user.findUnique({ where: { id }, select: { chapterId: true, accessLevel: true } })
   if (!target || target.chapterId !== chapterId) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  if (target.accessLevel === 'platform' && session.user.accessLevel !== 'platform') {
+    return NextResponse.json({ error: 'Cannot modify platform admin accounts' }, { status: 403 })
+  }
 
   // Soft delete
   await db.user.update({
