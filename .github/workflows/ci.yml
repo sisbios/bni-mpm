@@ -47,7 +47,7 @@ jobs:
       - name: Push schema to test DB
         env:
           DATABASE_URL: postgresql://bni:testpassword@localhost:5432/bni_test
-        run: npx prisma db push --skip-generate
+        run: npx prisma db push
 
       - name: Lint
         run: npm run lint || true
