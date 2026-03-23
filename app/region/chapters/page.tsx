@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import {
   Plus, Building2, Pencil, MapPin, Clock, Users, Leaf,
-  UserCheck, TrendingUp, Phone, IndianRupee,
+  UserCheck, TrendingUp, Phone, IndianRupee, LayoutDashboard,
 } from 'lucide-react'
 
 type HTMember = { id: string; name: string; role: string; phone: string | null }
@@ -276,6 +276,28 @@ export default function ChaptersListPage() {
                     </span>
                   </div>
                 </div>
+                {/* Admin Access link */}
+                <a
+                  href={`https://${ch.slug}.${typeof window !== 'undefined' ? window.location.hostname.replace(/^www\./, '') : 'bnimalappuram.com'}/dashboard`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={`Open ${ch.name} admin dashboard`}
+                  style={{
+                    flexShrink: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '30px',
+                    height: '30px',
+                    borderRadius: '8px',
+                    background: 'rgba(204,0,0,0.1)',
+                    border: '1px solid rgba(204,0,0,0.25)',
+                    color: '#CC0000',
+                    textDecoration: 'none',
+                  }}
+                >
+                  <LayoutDashboard size={12} />
+                </a>
                 {/* Edit link */}
                 <Link
                   href={`/region/chapters/${ch.id}`}
