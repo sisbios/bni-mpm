@@ -6,5 +6,5 @@
  * attendance percentages, or any chapter activity calculations.
  */
 export const NON_ADMIN_FILTER = {
-  role: { notIn: ['admin', 'platform'] },
-} as const
+  role: { notIn: ['admin', 'platform'] as string[] },
+}
