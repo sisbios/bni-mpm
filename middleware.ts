@@ -17,7 +17,7 @@ const DOMAIN_BASE = (process.env.DOMAIN_BASE ?? 'sisbios.cloud').split(':')[0]
 const REGION_URL = (process.env.REGION_URL ?? 'https://bnimpm.sisbios.cloud').replace(/\/$/, '')
 
 // Reserved subdomains that are never chapter slugs
-const RESERVED = new Set(['www', 'bni', 'bnimpm', 'region', 'admin', 'api'])
+const RESERVED = new Set(['www', 'bni', 'bnimpm', 'region', 'admin', 'api', 'bniapi'])
 
 function getSubdomain(host: string): string | null {
   if (APP_MODE === 'region') return null

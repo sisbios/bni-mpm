@@ -140,6 +140,7 @@ export default async function RegionOverviewPage() {
               <Link
                 key={ch.id}
                 href={`/region/chapters/${ch.id}`}
+                className="chapter-mini-card"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -150,17 +151,6 @@ export default async function RegionOverviewPage() {
                   padding: '12px',
                   textDecoration: 'none',
                   minHeight: '80px',
-                  transition: 'border-color 0.15s, background 0.15s',
-                }}
-                onMouseEnter={(e) => {
-                  const el = e.currentTarget as HTMLAnchorElement
-                  el.style.borderColor = 'rgba(204,0,0,0.3)'
-                  el.style.background = 'rgba(204,0,0,0.05)'
-                }}
-                onMouseLeave={(e) => {
-                  const el = e.currentTarget as HTMLAnchorElement
-                  el.style.borderColor = 'rgba(255,255,255,0.08)'
-                  el.style.background = 'rgba(255,255,255,0.04)'
                 }}
               >
                 {/* Initial circle */}
@@ -189,6 +179,13 @@ export default async function RegionOverviewPage() {
           </div>
         )}
       </div>
+
+      <style>{`
+        .chapter-mini-card:hover {
+          border-color: rgba(204,0,0,0.3) !important;
+          background: rgba(204,0,0,0.05) !important;
+        }
+      `}</style>
     </div>
   )
 }
