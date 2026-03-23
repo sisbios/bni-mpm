@@ -18,7 +18,7 @@ type RegionEvent = {
 }
 
 const EVENT_TYPES = [
-  { value: 'regional',      label: 'Regional Event',  color: '#8B5CF6' },
+  { value: 'regional',      label: 'Regional Event',  color: '#CC0000' },
   { value: 'training',      label: 'Training',        color: '#10B981' },
   { value: 'social',        label: 'Social',          color: '#F59E0B' },
   { value: 'trip',          label: 'Trip',            color: '#EC4899' },
@@ -102,9 +102,9 @@ export default function RegionCalendarClient({ chapters }: { chapters: { id: str
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px', flexWrap: 'wrap', gap: '10px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: '4px', height: '26px', background: 'linear-gradient(180deg, #CC0000, #8B5CF6)', borderRadius: '2px' }} />
+          <div style={{ width: '4px', height: '26px', background: 'linear-gradient(180deg, #CC0000, #990000)', borderRadius: '2px' }} />
           <h1 style={{ fontFamily: 'var(--font-bebas), sans-serif', fontSize: '26px', letterSpacing: '2px', color: '#ffffff', margin: 0 }}>
-            REGION <span style={{ color: '#8B5CF6' }}>CALENDAR</span>
+            REGION <span style={{ color: '#CC0000' }}>CALENDAR</span>
           </h1>
         </div>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -119,7 +119,7 @@ export default function RegionCalendarClient({ chapters }: { chapters: { id: str
           </select>
           <button
             onClick={() => { setEditingEvent(null); setSelectedDate(null); setShowModal(true) }}
-            style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '9px 16px', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #7C3AED, #5B21B6)', color: '#ffffff', fontSize: '13px', fontWeight: '600', cursor: 'pointer', boxShadow: '0 4px 15px rgba(124,58,237,0.3)' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '9px 16px', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #CC0000, #990000)', color: '#ffffff', fontSize: '13px', fontWeight: '600', cursor: 'pointer', boxShadow: '0 4px 15px rgba(204,0,0,0.35)' }}
           >
             <Plus size={14} /> New Regional Event
           </button>
@@ -127,10 +127,10 @@ export default function RegionCalendarClient({ chapters }: { chapters: { id: str
       </div>
 
       {/* Info banner */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', borderRadius: '8px', background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.18)', marginBottom: '16px' }}>
-        <Globe size={13} style={{ color: '#8B5CF6', flexShrink: 0 }} />
-        <span style={{ fontSize: '12px', color: '#A78BFA' }}>
-          Regional events (<span style={{ fontWeight: '700' }}>purple</span>) appear automatically on all chapter calendars. Chapter events are read-only here.
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', borderRadius: '8px', background: 'rgba(204,0,0,0.08)', border: '1px solid rgba(204,0,0,0.25)', marginBottom: '16px' }}>
+        <Globe size={13} style={{ color: '#CC0000', flexShrink: 0 }} />
+        <span style={{ fontSize: '12px', color: '#FF6B6B' }}>
+          Regional events (<span style={{ fontWeight: '700' }}>red</span>) appear automatically on all chapter calendars. Chapter events are read-only here.
         </span>
       </div>
 
@@ -188,8 +188,8 @@ export default function RegionCalendarClient({ chapters }: { chapters: { id: str
                                 width: ev.regionId ? '10px' : '8px',
                                 height: ev.regionId ? '10px' : '8px',
                                 borderRadius: '50%', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0,
-                                background: ev.regionId ? '#8B5CF6' : getColor(ev.eventType),
-                                boxShadow: ev.regionId ? '0 0 5px rgba(139,92,246,0.7)' : `0 0 4px ${getColor(ev.eventType)}80`,
+                                background: ev.regionId ? '#CC0000' : getColor(ev.eventType),
+                                boxShadow: ev.regionId ? '0 0 5px rgba(204,0,0,0.7)' : `0 0 4px ${getColor(ev.eventType)}80`,
                               } as React.CSSProperties}
                             />
                           ))}
@@ -207,7 +207,7 @@ export default function RegionCalendarClient({ chapters }: { chapters: { id: str
       {/* Legend */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: '14px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#8B5CF6', boxShadow: '0 0 5px rgba(139,92,246,0.7)' }} />
+          <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#CC0000', boxShadow: '0 0 5px rgba(204,0,0,0.7)' }} />
           <span style={{ fontSize: '11px', color: '#9CA3AF' }}>Regional (all chapters)</span>
         </div>
         {EVENT_TYPES.filter((t) => t.value !== 'regional').map((t) => (
@@ -232,7 +232,7 @@ export default function RegionCalendarClient({ chapters }: { chapters: { id: str
                     {EVENT_TYPES.find((t) => t.value === detail.eventType)?.label ?? detail.eventType}
                   </span>
                   {detail.regionId && (
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '10px', padding: '2px 8px', borderRadius: '4px', background: 'rgba(139,92,246,0.15)', color: '#A78BFA', fontWeight: '700' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '10px', padding: '2px 8px', borderRadius: '4px', background: 'rgba(204,0,0,0.12)', color: '#FF6B6B', fontWeight: '700' }}>
                       <Globe size={9} /> ALL CHAPTERS
                     </span>
                   )}
@@ -256,7 +256,7 @@ export default function RegionCalendarClient({ chapters }: { chapters: { id: str
             </div>
 
             {detail.bookingRequired && (
-              <div style={{ padding: '10px 12px', borderRadius: '8px', background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.18)', marginBottom: '14px', fontSize: '13px', color: '#A78BFA' }}>
+              <div style={{ padding: '10px 12px', borderRadius: '8px', background: 'rgba(204,0,0,0.08)', border: '1px solid rgba(204,0,0,0.25)', marginBottom: '14px', fontSize: '13px', color: '#FF6B6B' }}>
                 {detail.registrationCount} member{detail.registrationCount !== 1 ? 's' : ''} registered
               </div>
             )}
@@ -358,17 +358,17 @@ function RegionEventModal({ initialDate, editingEvent, onClose, onSuccess }: {
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 300, padding: '16px' }}
       onClick={onClose}>
-      <div style={{ background: 'rgba(10,15,28,0.97)', backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)', borderRadius: '14px', border: '1px solid rgba(139,92,246,0.2)', padding: '28px', width: '100%', maxWidth: '440px' }}
+      <div style={{ background: 'rgba(10,15,28,0.97)', backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)', borderRadius: '14px', border: '1px solid rgba(204,0,0,0.25)', padding: '28px', width: '100%', maxWidth: '440px' }}
         onClick={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
-          <Globe size={16} style={{ color: '#8B5CF6' }} />
+          <Globe size={16} style={{ color: '#CC0000' }} />
           <h2 style={{ fontFamily: 'var(--font-bebas), sans-serif', fontSize: '20px', letterSpacing: '2px', color: '#ffffff', margin: 0 }}>
             {editingEvent ? 'EDIT REGIONAL EVENT' : 'NEW REGIONAL EVENT'}
           </h2>
         </div>
 
         {!editingEvent && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '9px 12px', borderRadius: '8px', background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.18)', marginBottom: '18px', fontSize: '12px', color: '#A78BFA' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '9px 12px', borderRadius: '8px', background: 'rgba(204,0,0,0.08)', border: '1px solid rgba(204,0,0,0.25)', marginBottom: '18px', fontSize: '12px', color: '#FF6B6B' }}>
             <Globe size={11} /> This event will appear on all chapter calendars automatically
           </div>
         )}
@@ -397,13 +397,13 @@ function RegionEventModal({ initialDate, editingEvent, onClose, onSuccess }: {
               <div style={{ fontSize: '13px', color: '#ffffff', fontWeight: '600' }}>Booking Required</div>
               <div style={{ fontSize: '11px', color: '#6B7280', marginTop: '2px' }}>Members must register to attend</div>
             </div>
-            <button type="button" onClick={() => set('bookingRequired', !form.bookingRequired)} style={{ width: '42px', height: '24px', borderRadius: '12px', border: 'none', cursor: 'pointer', background: form.bookingRequired ? '#8B5CF6' : 'rgba(255,255,255,0.1)', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
+            <button type="button" onClick={() => set('bookingRequired', !form.bookingRequired)} style={{ width: '42px', height: '24px', borderRadius: '12px', border: 'none', cursor: 'pointer', background: form.bookingRequired ? '#CC0000' : 'rgba(255,255,255,0.1)', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
               <div style={{ position: 'absolute', top: '3px', left: form.bookingRequired ? '21px' : '3px', width: '18px', height: '18px', borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }} />
             </button>
           </div>
           <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
             <button type="button" onClick={onClose} style={{ flex: 1, padding: '11px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.07)', background: 'transparent', color: '#9CA3AF', fontSize: '13px', cursor: 'pointer' }}>Cancel</button>
-            <button type="submit" disabled={loading} style={{ flex: 1, padding: '11px', borderRadius: '8px', border: 'none', background: loading ? 'rgba(91,33,182,0.5)' : 'linear-gradient(135deg, #7C3AED, #5B21B6)', color: '#ffffff', fontSize: '13px', fontWeight: '700', cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+            <button type="submit" disabled={loading} style={{ flex: 1, padding: '11px', borderRadius: '8px', border: 'none', background: loading ? 'rgba(153,0,0,0.5)' : 'linear-gradient(135deg, #CC0000, #990000)', color: '#ffffff', fontSize: '13px', fontWeight: '700', cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
               {loading ? <><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> Saving...</> : editingEvent ? 'Update Event' : 'Create Event'}
             </button>
           </div>
