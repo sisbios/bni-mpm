@@ -5,12 +5,14 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 # ── deps stage ──────────────────────────────────────────────────
 FROM base AS deps
+USER root
 WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci
 
 # ── builder stage ────────────────────────────────────────────────
 FROM base AS builder
+USER root
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
