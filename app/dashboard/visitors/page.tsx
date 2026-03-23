@@ -11,7 +11,7 @@ export default async function VisitorsPage() {
   if (accessLevel === 'member') redirect('/portal')
 
   const canEdit =
-    accessLevel === 'superadmin' ||
+    accessLevel === 'superadmin' || accessLevel === 'platform' ||
     ['president', 'vicePresident'].includes(session.user.role ?? '')
 
   const [visitors, members] = await Promise.all([

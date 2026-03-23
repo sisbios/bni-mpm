@@ -9,7 +9,7 @@ export default async function AchievementsPage() {
   if ((session.user.accessLevel ?? 'member') === 'member') redirect('/portal')
 
   const canManage =
-    (session.user.accessLevel ?? 'member') === 'superadmin' ||
+    (session.user.accessLevel ?? 'member') === 'superadmin' || (session.user.accessLevel ?? 'member') === 'platform' ||
     ['president', 'vicePresident'].includes(session.user.role ?? '')
 
   const members = await db.user.findMany({
