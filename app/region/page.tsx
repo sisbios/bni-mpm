@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { db } from '@/lib/db'
 import Link from 'next/link'
 import { Building2, Users, CalendarCheck, UserCheck, Plus, ArrowRight } from 'lucide-react'
+import { NON_ADMIN_FILTER } from '@/lib/member-filter'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,7 +25,7 @@ export default async function RegionOverviewPage() {
   const chapterIds = chapters.map((c) => c.id)
 
   const [totalMembers, totalEventsThisMonth, totalVisitorsThisMonth, lastEvents, memberCountsRaw] = await Promise.all([
-    db.user.count({ where: { chapterId: { in: chapterIds } } }),
+    db.user.count({ where: { chapterId: { in: chapterIds }, ...NON_ADMIN_FILTER } }),
     db.event.count({
       where: {
         chapterId: { in: chapterIds },
@@ -46,7 +47,7 @@ export default async function RegionOverviewPage() {
     db.user.groupBy({
       by: ['chapterId'],
       _count: { id: true },
-      where: { chapterId: { in: chapterIds } },
+      where: { chapterId: { in: chapterIds }, ...NON_ADMIN_FILTER },
     }),
   ])
 
