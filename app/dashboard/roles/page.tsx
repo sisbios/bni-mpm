@@ -12,7 +12,7 @@ export default async function RolesPage() {
   if (level === 'member') redirect('/dashboard')
 
   const canManage =
-    level === 'superadmin' ||
+    level === 'superadmin' || level === 'platform' ||
     ['president', 'vicePresident'].includes(session.user.role ?? '')
 
   return <RolesClient canManage={canManage} callerRole={session.user.role ?? 'member'} />

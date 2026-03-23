@@ -1,3 +1,4 @@
+import { NON_ADMIN_FILTER } from '@/lib/member-filter'
 import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { db } from '@/lib/db'
@@ -50,14 +51,14 @@ export default async function TrafficLightPage() {
 
   // Only head table can enter scores
   const canEdit =
-    accessLevel === 'superadmin' ||
+    accessLevel === 'superadmin' || accessLevel === 'platform' ||
     ['president', 'vicePresident'].includes(session.user.role ?? '')
 
   const currentWeek = getISOWeek(new Date())
 
   const [members, scoreEntriesThisWeek, allPalms] = await Promise.all([
     db.user.findMany({
-      where: { isActive: true, role: { not: 'admin' } },
+      where: { isActive: true, ...NON_ADMIN_FILTER },
       select: { id: true, name: true, business: true, role: true, membershipValidTill: true },
       orderBy: { name: 'asc' },
     }),

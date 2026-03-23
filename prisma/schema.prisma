@@ -78,6 +78,7 @@ model User {
   memberPins    MemberPin[]
   visitors      Visitor[]   @relation("VisitorReferrer")
   businessGoals BusinessGoal[]
+  registrations EventRegistration[]
 
   @@index([chapterId])
 }
@@ -91,15 +92,19 @@ model Event {
   tags      String   @default("[]")
   colors    String   @default("[]")
   eventType String   @default("chapter") // chapter | regional | training | social | trip | international
-  isActive  Boolean  @default(true)
+  isActive        Boolean  @default(true)
+  regionId        String?
+  bookingRequired Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  rsvps        EventRSVP[]
-  meetingSlots MeetingSlot[]
+  rsvps         EventRSVP[]
+  meetingSlots  MeetingSlot[]
+  registrations EventRegistration[]
 
   @@index([date])
   @@index([chapterId])
+  @@index([regionId])
 }
 
 model EventRSVP {
@@ -361,5 +366,28 @@ model MeetingSlot {
 
   @@index([eventId])
   @@index([assignedUserId])
+  @@index([chapterId])
+}
+
+model EventRegistration {
+  id           String   @id @default(cuid())
+  eventId      String
+  userId       String
+  chapterId    String?
+  name         String
+  email        String?
+  phone        String?
+  business     String?
+  notes        String?
+  status       String   @default("registered")
+  registeredAt DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@index([eventId])
+  @@index([userId])
   @@index([chapterId])
 }

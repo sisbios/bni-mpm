@@ -1,3 +1,4 @@
+import { NON_ADMIN_FILTER } from '@/lib/member-filter'
 import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { db } from '@/lib/db'
@@ -42,7 +43,7 @@ export default async function PresentationsPage() {
   })
 
   const members = await db.user.findMany({
-    where: { isActive: true, role: { not: 'admin' } },
+    where: { isActive: true, ...NON_ADMIN_FILTER },
     select: { id: true, name: true, role: true },
     orderBy: { name: 'asc' },
   })

@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
+import { APP_VERSION } from '@/lib/version'
 import {
   LayoutDashboard,
   Building2,
@@ -21,6 +22,7 @@ import {
   UserCog,
   Menu,
   ShieldCheck,
+  ClipboardList,
 } from 'lucide-react'
 
 type NavItem = { href: string; icon: React.ElementType; label: string; exact?: boolean }
@@ -30,8 +32,9 @@ const navItems: NavItem[] = [
   { href: '/region/chapters',      icon: Building2,       label: 'Chapters' },
   { href: '/region/members',       icon: Users,           label: 'Members' },
   { href: '/region/calendar',      icon: Calendar,        label: 'Calendar' },
-  { href: '/region/events',        icon: CalendarCheck,   label: 'Events' },
-  { href: '/region/presentations', icon: Mic2,            label: 'Presentations' },
+  { href: '/region/events',                icon: CalendarCheck,   label: 'Events' },
+  { href: '/region/event-registrations',  icon: ClipboardList,   label: 'Event Registrations' },
+  { href: '/region/presentations',        icon: Mic2,            label: 'Presentations' },
   { href: '/region/palms',         icon: BarChart2,       label: 'PALMS Report' },
   { href: '/region/visitors',      icon: UserCheck,       label: 'Visitors Pool' },
   { href: '/region/traffic-light', icon: TrendingUp,      label: 'Traffic Light' },
@@ -52,9 +55,9 @@ function isActive(item: NavItem, pathname: string) {
   return pathname.startsWith(item.href)
 }
 
+// ─── Full sidebar (desktop) ────────────────────────────────────────────────
 function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () => void }) {
   const router = useRouter()
-  const { data: session } = useSession()
 
   async function handleSignOut() {
     await signOut({ redirect: false })
@@ -62,223 +65,164 @@ function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () 
   }
 
   return (
-    <div
-      className="glass-sidebar"
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        backdropFilter: 'blur(20px) saturate(160%)',
-        WebkitBackdropFilter: 'blur(20px) saturate(160%)',
-      }}
-    >
-      {/* Top accent line */}
+    <div className="glass-sidebar" style={{
+      display: 'flex', flexDirection: 'column', height: '100%',
+      backdropFilter: 'blur(20px) saturate(160%)', WebkitBackdropFilter: 'blur(20px) saturate(160%)',
+    }}>
       <div style={{ height: '2px', background: 'linear-gradient(90deg, #CC0000, #C9A84C)', flexShrink: 0 }} />
-
-      {/* Logo */}
-      <div
-        style={{
-          padding: '22px 20px',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
-          position: 'relative',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-        }}
-      >
-        <div
-          style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '10px',
-            background: 'linear-gradient(135deg, #CC0000, #8B0000)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontFamily: 'var(--font-bebas), sans-serif',
-            fontSize: '15px',
-            color: '#fff',
-            letterSpacing: '1px',
-            flexShrink: 0,
-            boxShadow: '0 4px 12px rgba(204,0,0,0.35)',
-          }}
-        >
-          BNI
-        </div>
+      <div style={{ padding: '18px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{
+          width: '36px', height: '36px', borderRadius: '9px', flexShrink: 0,
+          background: 'linear-gradient(135deg, #CC0000, #8B0000)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontFamily: 'var(--font-bebas), sans-serif', fontSize: '14px', color: '#fff',
+          letterSpacing: '1px', boxShadow: '0 4px 12px rgba(204,0,0,0.35)',
+        }}>BNI</div>
         <div>
-          <div
-            style={{
-              fontFamily: 'var(--font-bebas), sans-serif',
-              fontSize: '18px',
-              color: '#C9A84C',
-              letterSpacing: '2px',
-              lineHeight: 1.1,
-            }}
-          >
-            BNI REGION
-          </div>
-          <div style={{ fontSize: '9px', color: '#8B95A3', letterSpacing: '2px', textTransform: 'uppercase' }}>
-            Malappuram Region
-          </div>
+          <div style={{ fontFamily: 'var(--font-bebas), sans-serif', fontSize: '17px', color: '#C9A84C', letterSpacing: '2px', lineHeight: 1.1 }}>BNI REGION</div>
+          <div style={{ fontSize: '9px', color: '#8B95A3', letterSpacing: '2px', textTransform: 'uppercase' }}>Malappuram Region</div>
         </div>
         {onClose && (
-          <button
-            onClick={onClose}
-            style={{
-              marginLeft: 'auto',
-              color: '#6B7280',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '6px',
-              borderRadius: '6px',
-            }}
-          >
-            <X size={17} />
+          <button onClick={onClose} style={{ marginLeft: 'auto', color: '#6B7280', background: 'none', border: 'none', cursor: 'pointer', padding: '4px', borderRadius: '6px' }}>
+            <X size={16} />
           </button>
         )}
       </div>
 
-      {/* Navigation */}
-      <nav style={{ flex: 1, padding: '12px', overflowY: 'auto' }}>
-        <div
-          style={{
-            fontSize: '9px',
-            color: '#6B7280',
-            letterSpacing: '2px',
-            textTransform: 'uppercase',
-            padding: '4px 10px 10px',
-          }}
-        >
-          Region Management
-        </div>
+      <nav style={{ flex: 1, padding: '10px 8px', overflowY: 'auto' }}>
+        <div style={{ fontSize: '9px', color: '#4B5563', letterSpacing: '2px', textTransform: 'uppercase', padding: '4px 8px 8px' }}>Region Management</div>
         {navItems.map((item) => {
           const active = isActive(item, pathname)
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={onClose}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '11px',
-                padding: '10px 12px',
-                borderRadius: '10px',
-                marginBottom: '2px',
-                textDecoration: 'none',
-                color: active ? '#ffffff' : '#9CA3AF',
-                background: active ? 'rgba(204,0,0,0.14)' : 'transparent',
-                border: active ? '1px solid rgba(204,0,0,0.22)' : '1px solid transparent',
-                backdropFilter: active ? 'blur(8px)' : 'none',
-                transition: 'all 0.15s',
-                fontSize: '13.5px',
-                fontWeight: active ? '600' : '400',
-              }}
-            >
-              <item.icon size={17} style={{ color: active ? '#CC0000' : '#6B7280', flexShrink: 0 }} />
+            <Link key={item.href} href={item.href} onClick={onClose} style={{
+              display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 10px',
+              borderRadius: '9px', marginBottom: '1px', textDecoration: 'none',
+              color: active ? '#ffffff' : '#9CA3AF',
+              background: active ? 'rgba(204,0,0,0.14)' : 'transparent',
+              border: active ? '1px solid rgba(204,0,0,0.22)' : '1px solid transparent',
+              transition: 'all 0.15s', fontSize: '13px', fontWeight: active ? '600' : '400',
+            }}>
+              <item.icon size={16} style={{ color: active ? '#CC0000' : '#6B7280', flexShrink: 0 }} />
               <span style={{ flex: 1 }}>{item.label}</span>
-              {active && <ChevronRight size={13} style={{ color: '#CC0000', opacity: 0.7 }} />}
+              {active && <ChevronRight size={12} style={{ color: '#CC0000', opacity: 0.7 }} />}
             </Link>
           )
         })}
-
-        <div
-          style={{
-            marginTop: '16px',
-            fontSize: '9px',
-            color: '#6B7280',
-            letterSpacing: '2px',
-            textTransform: 'uppercase',
-            padding: '4px 10px 10px',
-          }}
-        >
-          System
-        </div>
-        <Link
-          href="/region/settings"
-          onClick={onClose}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '11px',
-            padding: '10px 12px',
-            borderRadius: '10px',
-            textDecoration: 'none',
-            color: pathname.startsWith('/region/settings') ? '#ffffff' : '#9CA3AF',
-            background: pathname.startsWith('/region/settings') ? 'rgba(204,0,0,0.14)' : 'transparent',
-            border: pathname.startsWith('/region/settings')
-              ? '1px solid rgba(204,0,0,0.22)'
-              : '1px solid transparent',
-            transition: 'all 0.15s',
-            fontSize: '13.5px',
-            fontWeight: pathname.startsWith('/region/settings') ? '600' : '400',
-          }}
-        >
-          <Settings size={17} style={{ color: pathname.startsWith('/region/settings') ? '#CC0000' : '#6B7280', flexShrink: 0 }} />
-          <span style={{ flex: 1 }}>Settings</span>
-          {pathname.startsWith('/region/settings') && <ChevronRight size={13} style={{ color: '#CC0000', opacity: 0.7 }} />}
+        <div style={{ marginTop: '12px', fontSize: '9px', color: '#4B5563', letterSpacing: '2px', textTransform: 'uppercase', padding: '4px 8px 8px' }}>System</div>
+        <Link href="/region/settings" onClick={onClose} style={{
+          display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 10px',
+          borderRadius: '9px', textDecoration: 'none',
+          color: pathname.startsWith('/region/settings') ? '#ffffff' : '#9CA3AF',
+          background: pathname.startsWith('/region/settings') ? 'rgba(204,0,0,0.14)' : 'transparent',
+          border: pathname.startsWith('/region/settings') ? '1px solid rgba(204,0,0,0.22)' : '1px solid transparent',
+          transition: 'all 0.15s', fontSize: '13px', fontWeight: pathname.startsWith('/region/settings') ? '600' : '400',
+        }}>
+          <Settings size={16} style={{ color: pathname.startsWith('/region/settings') ? '#CC0000' : '#6B7280', flexShrink: 0 }} />
+          <span>Settings</span>
         </Link>
       </nav>
 
-      {/* User footer */}
-      <div style={{ padding: '12px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div style={{ padding: '6px 12px 8px', overflow: 'hidden' }}>
-          <div style={{ fontSize: '13px', fontWeight: '600', color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {session?.user?.name ?? 'Region Admin'}
-          </div>
-          <div style={{ fontSize: '11px', color: '#CC0000', textTransform: 'capitalize', fontWeight: '400' }}>
-            regionAdmin
-          </div>
-        </div>
-        <button
-          onClick={handleSignOut}
-          style={{
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '9px 12px',
-            borderRadius: '8px',
-            border: '1px solid rgba(255,255,255,0.06)',
-            background: 'transparent',
-            color: '#6B7280',
-            fontSize: '13px',
-            cursor: 'pointer',
-            transition: 'all 0.15s',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'rgba(204,0,0,0.1)'
-            e.currentTarget.style.color = '#CC0000'
-            e.currentTarget.style.borderColor = 'rgba(204,0,0,0.22)'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'transparent'
-            e.currentTarget.style.color = '#6B7280'
-            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'
-          }}
+      <div style={{ padding: '10px 8px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <button onClick={handleSignOut} style={{
+          width: '100%', display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 10px',
+          borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)', background: 'transparent',
+          color: '#6B7280', fontSize: '12px', cursor: 'pointer', transition: 'all 0.15s',
+        }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(204,0,0,0.1)'; e.currentTarget.style.color = '#CC0000'; e.currentTarget.style.borderColor = 'rgba(204,0,0,0.22)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#6B7280'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)' }}
         >
-          <LogOut size={14} />
-          Sign out
+          <LogOut size={13} /><span>Sign out</span>
+        </button>
+        <div style={{ textAlign: 'center', marginTop: '6px', fontSize: '10px', color: '#374151', letterSpacing: '1px' }}>{APP_VERSION}</div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Icon-only sidebar (mobile drawer) ────────────────────────────────────
+function MobileSideDrawer({ pathname, onClose }: { pathname: string; onClose: () => void }) {
+  const router = useRouter()
+
+  async function handleSignOut() {
+    await signOut({ redirect: false })
+    router.push('/login')
+  }
+
+  const allItems = [...navItems, { href: '/region/settings', icon: Settings, label: 'Settings', exact: false }]
+
+  return (
+    <div className="glass-sidebar" style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '64px' }}>
+      <div style={{ height: '2px', background: 'linear-gradient(90deg, #CC0000, #C9A84C)', flexShrink: 0 }} />
+      <div style={{ padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+        <div style={{
+          width: '34px', height: '34px', borderRadius: '8px',
+          background: 'linear-gradient(135deg, #CC0000, #8B0000)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontFamily: 'var(--font-bebas), sans-serif', fontSize: '12px', color: '#fff', letterSpacing: '1px',
+        }}>BNI</div>
+        <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#4B5563', padding: '2px' }}>
+          <X size={14} />
+        </button>
+      </div>
+
+      <nav style={{ flex: 1, padding: '8px 0', overflowY: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+        {allItems.map((item) => {
+          const active = isActive(item as NavItem, pathname)
+          return (
+            <Link key={item.href} href={item.href} onClick={onClose} title={item.label} style={{
+              width: '44px', height: '44px', borderRadius: '10px', flexShrink: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              textDecoration: 'none',
+              background: active ? 'rgba(204,0,0,0.18)' : 'transparent',
+              border: active ? '1px solid rgba(204,0,0,0.28)' : '1px solid transparent',
+              transition: 'all 0.15s',
+            }}>
+              <item.icon size={19} style={{ color: active ? '#CC0000' : '#6B7280' }} />
+            </Link>
+          )
+        })}
+      </nav>
+
+      <div style={{ padding: '10px 0', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'center' }}>
+        <button onClick={handleSignOut} title="Sign out" style={{
+          width: '44px', height: '44px', borderRadius: '10px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'transparent', border: '1px solid transparent', cursor: 'pointer', transition: 'all 0.15s',
+        }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(204,0,0,0.12)'; e.currentTarget.style.borderColor = 'rgba(204,0,0,0.22)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent' }}
+        >
+          <LogOut size={17} style={{ color: '#CC0000' }} />
         </button>
       </div>
     </div>
   )
 }
 
+// ─── Profile menu ──────────────────────────────────────────────────────────
 function ProfileMenu() {
   const { data: session } = useSession()
   const router = useRouter()
   const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
+  const [dropPos, setDropPos] = useState({ top: 0, right: 0 })
+  const wrapRef = useRef<HTMLDivElement>(null)
+  const btnRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false)
     }
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
+
+  function handleToggle() {
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect()
+      setDropPos({ top: rect.bottom + 8, right: window.innerWidth - rect.right })
+    }
+    setOpen((o) => !o)
+  }
 
   async function handleSignOut() {
     setOpen(false)
@@ -290,92 +234,75 @@ function ProfileMenu() {
   const name = session?.user?.name ?? 'Region Admin'
 
   return (
-    <div ref={ref} style={{ position: 'relative' }}>
-      <button
-        onClick={() => setOpen((o) => !o)}
-        style={{
-          display: 'flex', alignItems: 'center', gap: '8px',
-          background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 6px',
-          borderRadius: '10px', transition: 'background 0.15s',
-        }}
+    <div ref={wrapRef} style={{ position: 'relative' }}>
+      <button ref={btnRef} onClick={handleToggle} style={{
+        display: 'flex', alignItems: 'center', gap: '8px',
+        background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 6px',
+        borderRadius: '10px', transition: 'background 0.15s',
+      }}
         onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
         onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
       >
         <div className="hidden sm:block" style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '13px', fontWeight: '600', color: '#ffffff', lineHeight: '1.2', whiteSpace: 'nowrap' }}>{name}</div>
-          <div style={{ fontSize: '11px', fontWeight: '400', color: '#CC0000', lineHeight: '1.2' }}>Region Admin</div>
+          <div style={{ fontSize: '12px', fontWeight: '600', color: '#ffffff', lineHeight: '1.2', whiteSpace: 'nowrap' }}>{name}</div>
+          <div style={{ fontSize: '10px', color: '#CC0000', lineHeight: '1.2' }}>Region Admin</div>
         </div>
-        <div
-          style={{
-            width: '34px', height: '34px', borderRadius: '50%', flexShrink: 0,
-            background: open ? 'rgba(204,0,0,0.25)' : 'rgba(204,0,0,0.12)',
-            border: `2px solid ${open ? 'rgba(204,0,0,0.6)' : 'rgba(204,0,0,0.28)'}`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: '700', fontSize: '14px', color: '#CC0000', transition: 'all 0.15s',
-          }}
-        >
-          {initials}
-        </div>
+        <div style={{
+          width: '32px', height: '32px', borderRadius: '50%', flexShrink: 0,
+          background: open ? 'rgba(204,0,0,0.25)' : 'rgba(204,0,0,0.12)',
+          border: `2px solid ${open ? 'rgba(204,0,0,0.6)' : 'rgba(204,0,0,0.28)'}`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontWeight: '700', fontSize: '13px', color: '#CC0000', transition: 'all 0.15s',
+        }}>{initials}</div>
       </button>
 
       {open && (
         <div style={{
-          position: 'absolute', top: 'calc(100% + 8px)', right: 0,
-          width: '220px', zIndex: 200,
+          position: 'fixed', top: dropPos.top, right: dropPos.right,
+          width: '210px', zIndex: 9999,
           background: 'rgba(8,12,24,0.97)',
           backdropFilter: 'blur(24px) saturate(180%)',
           WebkitBackdropFilter: 'blur(24px) saturate(180%)',
           borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)',
-          boxShadow: '0 16px 48px rgba(0,0,0,0.6)',
+          boxShadow: '0 16px 48px rgba(0,0,0,0.7)',
           overflow: 'hidden',
         }}>
-          <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+          <div style={{ padding: '12px 14px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div style={{
-                width: '38px', height: '38px', borderRadius: '50%', flexShrink: 0,
+                width: '36px', height: '36px', borderRadius: '50%', flexShrink: 0,
                 background: 'rgba(204,0,0,0.12)', border: '2px solid rgba(204,0,0,0.28)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontWeight: '700', fontSize: '16px', color: '#CC0000',
-              }}>
-                {initials}
-              </div>
+                fontWeight: '700', fontSize: '15px', color: '#CC0000',
+              }}>{initials}</div>
               <div style={{ overflow: 'hidden' }}>
-                <div style={{ fontSize: '14px', fontWeight: '700', color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</div>
-                <div style={{ fontSize: '12px', color: '#CC0000', fontWeight: '600' }}>Region Admin</div>
+                <div style={{ fontSize: '13px', fontWeight: '700', color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</div>
+                <div style={{ fontSize: '11px', color: '#CC0000', fontWeight: '600' }}>Region Admin</div>
               </div>
             </div>
           </div>
-          <div style={{ padding: '6px' }}>
-            <Link
-              href="/region/settings"
-              onClick={() => setOpen(false)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '10px',
-                padding: '10px 12px', borderRadius: '8px', textDecoration: 'none',
-                color: '#9CA3AF', fontSize: '14px', fontWeight: '600',
-                transition: 'all 0.12s',
-              }}
+          <div style={{ padding: '4px' }}>
+            <Link href="/region/settings" onClick={() => setOpen(false)} style={{
+              display: 'flex', alignItems: 'center', gap: '10px',
+              padding: '9px 12px', borderRadius: '8px', textDecoration: 'none',
+              color: '#9CA3AF', fontSize: '13px', fontWeight: '600', transition: 'all 0.12s',
+            }}
               onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#ffffff' }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#9CA3AF' }}
             >
-              <UserCog size={15} style={{ color: '#6B7280' }} />
-              Region Settings
+              <UserCog size={14} style={{ color: '#6B7280' }} />Region Settings
             </Link>
-            <div style={{ height: '1px', background: 'rgba(255,255,255,0.06)', margin: '4px 0' }} />
-            <button
-              onClick={handleSignOut}
-              style={{
-                width: '100%', display: 'flex', alignItems: 'center', gap: '10px',
-                padding: '10px 12px', borderRadius: '8px',
-                background: 'transparent', border: 'none',
-                color: '#9CA3AF', fontSize: '14px', fontWeight: '600',
-                cursor: 'pointer', transition: 'all 0.12s', textAlign: 'left',
-              }}
+            <div style={{ height: '1px', background: 'rgba(255,255,255,0.06)', margin: '3px 0' }} />
+            <button onClick={handleSignOut} style={{
+              width: '100%', display: 'flex', alignItems: 'center', gap: '10px',
+              padding: '9px 12px', borderRadius: '8px', background: 'transparent', border: 'none',
+              color: '#9CA3AF', fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+              transition: 'all 0.12s', textAlign: 'left',
+            }}
               onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(239,68,68,0.1)'; e.currentTarget.style.color = '#EF4444' }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#9CA3AF' }}
             >
-              <LogOut size={15} style={{ color: '#EF4444' }} />
-              Sign Out
+              <LogOut size={14} style={{ color: '#EF4444' }} />Sign Out
             </button>
           </div>
         </div>
@@ -384,62 +311,30 @@ function ProfileMenu() {
   )
 }
 
+// ─── Mobile bottom nav ─────────────────────────────────────────────────────
 function MobileBottomNav({ pathname }: { pathname: string }) {
   return (
-    <nav
-      className="lg:hidden glass-nav"
-      style={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        zIndex: 40,
-        borderTop: '1px solid rgba(255,255,255,0.07)',
-        display: 'flex',
-        alignItems: 'stretch',
-        paddingBottom: 'env(safe-area-inset-bottom)',
-      }}
-    >
+    <nav className="flex lg:hidden glass-nav" style={{
+      flexShrink: 0, borderTop: '1px solid rgba(255,255,255,0.07)',
+      alignItems: 'stretch', paddingBottom: 'env(safe-area-inset-bottom)',
+    }}>
       {bottomNavItems.map((item) => {
         const active = isActive(item, pathname)
         return (
-          <Link
-            key={item.href}
-            href={item.href}
-            style={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '4px',
-              padding: '10px 2px 12px',
-              textDecoration: 'none',
-              color: active ? '#CC0000' : '#6B7280',
-              transition: 'color 0.18s',
-              WebkitTapHighlightColor: 'transparent',
-            }}
-          >
-            <div
-              className="bottom-nav-pill"
-              style={{
-                background: active ? 'rgba(204,0,0,0.15)' : 'transparent',
-                borderColor: active ? 'rgba(204,0,0,0.22)' : 'transparent',
-                boxShadow: active ? '0 0 14px rgba(204,0,0,0.28)' : 'none',
-              }}
-            >
-              <item.icon size={21} strokeWidth={active ? 2.2 : 1.8} />
+          <Link key={item.href} href={item.href} style={{
+            flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
+            justifyContent: 'center', gap: '3px', padding: '9px 2px 10px',
+            textDecoration: 'none', color: active ? '#CC0000' : '#6B7280',
+            transition: 'color 0.18s', WebkitTapHighlightColor: 'transparent',
+          }}>
+            <div className="bottom-nav-pill" style={{
+              background: active ? 'rgba(204,0,0,0.15)' : 'transparent',
+              borderColor: active ? 'rgba(204,0,0,0.22)' : 'transparent',
+              boxShadow: active ? '0 0 14px rgba(204,0,0,0.28)' : 'none',
+            }}>
+              <item.icon size={20} strokeWidth={active ? 2.2 : 1.8} />
             </div>
-            <span
-              style={{
-                fontSize: '9px',
-                fontWeight: active ? '700' : '400',
-                letterSpacing: '0.5px',
-                textTransform: 'uppercase',
-                opacity: active ? 1 : 0.55,
-                transition: 'all 0.18s',
-              }}
-            >
+            <span style={{ fontSize: '9px', fontWeight: active ? '700' : '400', letterSpacing: '0.4px', textTransform: 'uppercase', opacity: active ? 1 : 0.5 }}>
               {item.label}
             </span>
           </Link>
@@ -449,46 +344,28 @@ function MobileBottomNav({ pathname }: { pathname: string }) {
   )
 }
 
+// ─── Layout ────────────────────────────────────────────────────────────────
 export default function RegionLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
 
-  useEffect(() => {
-    setMobileOpen(false)
-  }, [pathname])
+  useEffect(() => { setMobileOpen(false) }, [pathname])
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        height: '100dvh',
-        backgroundColor: '#0A0F1E',
-        overflow: 'hidden',
-      }}
-    >
+    <div style={{ display: 'flex', height: '100dvh', backgroundColor: '#0A0F1E', overflow: 'hidden' }}>
       {/* Desktop sidebar */}
-      <div style={{ width: '240px', flexShrink: 0, height: '100%' }} className="hidden lg:block">
+      <div style={{ width: '232px', flexShrink: 0, height: '100%' }} className="hidden lg:block">
         <SidebarContent pathname={pathname} />
       </div>
 
-      {/* Mobile drawer overlay */}
+      {/* Mobile icon drawer */}
       {mobileOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 50,
-            backgroundColor: 'rgba(0,0,0,0.6)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-          }}
-          onClick={() => setMobileOpen(false)}
-        >
-          <div
-            style={{ width: '260px', height: '100%' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <SidebarContent pathname={pathname} onClose={() => setMobileOpen(false)} />
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 50,
+          backgroundColor: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)', display: 'flex',
+        }} onClick={() => setMobileOpen(false)}>
+          <div onClick={(e) => e.stopPropagation()}>
+            <MobileSideDrawer pathname={pathname} onClose={() => setMobileOpen(false)} />
           </div>
         </div>
       )}
@@ -497,79 +374,49 @@ export default function RegionLayout({ children }: { children: React.ReactNode }
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
 
         {/* Desktop topbar */}
-        <div
-          className="hidden lg:flex glass-topbar"
-          style={{
-            height: '52px',
-            borderBottom: '1px solid rgba(255,255,255,0.06)',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '0 20px',
-            flexShrink: 0,
-            gap: '12px',
-          }}
-        >
+        <div className="hidden lg:flex glass-topbar" style={{
+          height: '50px', borderBottom: '1px solid rgba(255,255,255,0.06)',
+          alignItems: 'center', justifyContent: 'space-between',
+          padding: '0 18px', flexShrink: 0, gap: '12px',
+        }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#CC0000' }} />
-            <span style={{ fontSize: '12px', color: '#6B7280', letterSpacing: '1px', textTransform: 'uppercase' }}>Region Admin Portal</span>
+            <span style={{ fontSize: '11px', color: '#6B7280', letterSpacing: '1px', textTransform: 'uppercase' }}>Region Admin Portal</span>
           </div>
           <ProfileMenu />
         </div>
 
-        {/* Mobile top bar */}
-        <div
-          className="flex lg:hidden glass-topbar"
-          style={{
-            height: '52px',
-            borderBottom: '1px solid rgba(255,255,255,0.06)',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '0 16px',
-            flexShrink: 0,
-            position: 'relative',
-          }}
-        >
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: '1px',
-              background: 'linear-gradient(90deg, transparent, rgba(204,0,0,0.5), rgba(201,168,76,0.5), transparent)',
-            }}
-          />
-          <button
-            onClick={() => setMobileOpen(true)}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', padding: '6px' }}
-          >
-            <Menu size={20} />
+        {/* Mobile topbar */}
+        <div className="flex lg:hidden glass-topbar" style={{
+          height: '50px', borderBottom: '1px solid rgba(255,255,255,0.06)',
+          alignItems: 'center', justifyContent: 'space-between',
+          padding: '0 12px', flexShrink: 0, position: 'relative',
+        }}>
+          <div style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0, height: '1px',
+            background: 'linear-gradient(90deg, transparent, rgba(204,0,0,0.5), rgba(201,168,76,0.5), transparent)',
+          }} />
+          {/* Hamburger */}
+          <button onClick={() => setMobileOpen(true)} style={{
+            background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
+            cursor: 'pointer', color: '#9CA3AF', padding: '7px', borderRadius: '8px',
+          }}>
+            <Menu size={18} />
           </button>
-          <div
-            style={{
-              fontFamily: 'var(--font-bebas), sans-serif',
-              fontSize: '22px',
-              letterSpacing: '3px',
-              color: '#ffffff',
-            }}
-          >
+          <div style={{ fontFamily: 'var(--font-bebas), sans-serif', fontSize: '20px', letterSpacing: '3px', color: '#ffffff' }}>
             BNI <span style={{ color: '#CC0000' }}>REGION</span>
           </div>
           <ProfileMenu />
         </div>
 
         {/* Page content */}
-        <main
-          style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '16px' }}
-        >
+        <main style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '14px' }}>
           {children}
-          {/* Bottom nav spacer — mobile only */}
-          <div className="lg:hidden" style={{ height: '72px' }} />
         </main>
-      </div>
 
-      {/* Mobile bottom navigation */}
-      <MobileBottomNav pathname={pathname} />
+        {/* Mobile bottom nav — flex child, never overlaps */}
+        <MobileBottomNav pathname={pathname} />
+      </div>
     </div>
   )
 }

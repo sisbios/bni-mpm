@@ -95,7 +95,7 @@ export default function NewChapterPage() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
             <div>
               <label style={labelStyle}>Meeting Day</label>
-              <select name="meetingDay" value={form.meetingDay} onChange={handleChange} style={{ ...inputStyle, cursor: 'pointer' }}>
+              <select name="meetingDay" value={form.meetingDay} onChange={handleChange} style={{ ...inputStyle, cursor: 'pointer', background: '#111827', colorScheme: 'dark' }}>
                 <option value="">Select day</option>
                 {MEETING_DAYS.map((d) => <option key={d} value={d}>{d}</option>)}
               </select>

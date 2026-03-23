@@ -1,6 +1,7 @@
 import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { db } from '@/lib/db'
+import { NON_ADMIN_FILTER } from '@/lib/member-filter'
 import Link from 'next/link'
 import { Users, CalendarCheck, ClipboardList, Trophy, TrendingUp, Plus } from 'lucide-react'
 
@@ -27,7 +28,7 @@ async function getDashboardStats() {
 
   const [totalMembers, upcomingEvents, openTasks, achievementsThisMonth, recentMembers] =
     await Promise.all([
-      db.user.count({ where: { isActive: true, role: { not: 'admin' } } }),
+      db.user.count({ where: { isActive: true, ...NON_ADMIN_FILTER } }),
       db.event.count({
         where: {
           isActive: true,
@@ -41,7 +42,7 @@ async function getDashboardStats() {
         where: { createdAt: { gte: startOfMonth, lte: endOfMonth } },
       }),
       db.user.findMany({
-        where: { isActive: true, role: { not: 'admin' } },
+        where: { isActive: true, ...NON_ADMIN_FILTER },
         orderBy: { createdAt: 'desc' },
         take: 5,
         select: { id: true, name: true, business: true, category: true, createdAt: true, role: true },

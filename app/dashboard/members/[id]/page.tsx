@@ -72,7 +72,7 @@ export default async function MemberProfilePage({
 
   const canManagePins = (session.user.accessLevel ?? 'member') !== 'member'
   const canManage =
-    (session.user.accessLevel ?? 'member') === 'superadmin' ||
+    (session.user.accessLevel ?? 'member') === 'superadmin' || (session.user.accessLevel ?? 'member') === 'platform' ||
     ['president', 'vicePresident'].includes(session.user.role ?? '')
 
   const roleObj = roles.find((r) => r.slug === user.role)
