@@ -7,23 +7,42 @@ import {
   LayoutDashboard,
   Building2,
   Users,
+  Calendar,
+  CalendarCheck,
+  Mic2,
+  BarChart2,
+  UserCheck,
+  TrendingUp,
   BarChart3,
   Settings,
   LogOut,
   X,
   ChevronRight,
   UserCog,
-  Plus,
+  Menu,
 } from 'lucide-react'
 
 type NavItem = { href: string; icon: React.ElementType; label: string; exact?: boolean }
 
 const navItems: NavItem[] = [
-  { href: '/region',          icon: LayoutDashboard, label: 'Overview',    exact: true },
+  { href: '/region',               icon: LayoutDashboard, label: 'Overview',       exact: true },
+  { href: '/region/chapters',      icon: Building2,       label: 'Chapters' },
+  { href: '/region/members',       icon: Users,           label: 'Members' },
+  { href: '/region/calendar',      icon: Calendar,        label: 'Calendar' },
+  { href: '/region/events',        icon: CalendarCheck,   label: 'Events' },
+  { href: '/region/presentations', icon: Mic2,            label: 'Presentations' },
+  { href: '/region/palms',         icon: BarChart2,       label: 'PALMS Report' },
+  { href: '/region/visitors',      icon: UserCheck,       label: 'Visitors Pool' },
+  { href: '/region/traffic-light', icon: TrendingUp,      label: 'Traffic Light' },
+  { href: '/region/analytics',     icon: BarChart3,       label: 'Analytics' },
+]
+
+const bottomNavItems: NavItem[] = [
+  { href: '/region',          icon: LayoutDashboard, label: 'Overview', exact: true },
   { href: '/region/chapters', icon: Building2,       label: 'Chapters' },
-  { href: '/region/members',  icon: Users,           label: 'All Members' },
+  { href: '/region/events',   icon: CalendarCheck,   label: 'Events' },
+  { href: '/region/members',  icon: Users,           label: 'Members' },
   { href: '/region/analytics',icon: BarChart3,       label: 'Analytics' },
-  { href: '/region/settings', icon: Settings,        label: 'Settings' },
 ]
 
 function isActive(item: NavItem, pathname: string) {
@@ -42,38 +61,84 @@ function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () 
 
   return (
     <div className="glass-sidebar" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div style={{ height: '2px', background: 'linear-gradient(90deg, #1E40AF, #C9A84C)', flexShrink: 0 }} />
+      {/* Top accent line */}
+      <div style={{ height: '2px', background: 'linear-gradient(90deg, #3B82F6, #C9A84C)', flexShrink: 0 }} />
 
       {/* Logo */}
-      <div style={{ padding: '22px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <div style={{
-          width: '40px', height: '40px', borderRadius: '10px',
-          background: 'linear-gradient(135deg, #1E40AF, #1E3A8A)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: 'var(--font-bebas), sans-serif', fontSize: '15px',
-          color: '#fff', letterSpacing: '1px', flexShrink: 0,
-          boxShadow: '0 4px 12px rgba(30,64,175,0.4)',
-        }}>
+      <div
+        style={{
+          padding: '22px 20px',
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+        }}
+      >
+        <div
+          style={{
+            width: '40px',
+            height: '40px',
+            borderRadius: '10px',
+            background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontFamily: 'var(--font-bebas), sans-serif',
+            fontSize: '15px',
+            color: '#fff',
+            letterSpacing: '1px',
+            flexShrink: 0,
+            boxShadow: '0 4px 12px rgba(59,130,246,0.35)',
+          }}
+        >
           BNI
         </div>
         <div>
-          <div style={{ fontFamily: 'var(--font-bebas), sans-serif', fontSize: '18px', color: '#C9A84C', letterSpacing: '2px', lineHeight: 1.1 }}>
-            REGION ADMIN
+          <div
+            style={{
+              fontFamily: 'var(--font-bebas), sans-serif',
+              fontSize: '18px',
+              color: '#C9A84C',
+              letterSpacing: '2px',
+              lineHeight: 1.1,
+            }}
+          >
+            BNI REGION
           </div>
           <div style={{ fontSize: '9px', color: '#8B95A3', letterSpacing: '2px', textTransform: 'uppercase' }}>
-            South Kerala
+            Malappuram Region
           </div>
         </div>
         {onClose && (
-          <button onClick={onClose} style={{ marginLeft: 'auto', color: '#6B7280', background: 'none', border: 'none', cursor: 'pointer', padding: '6px', borderRadius: '6px' }}>
+          <button
+            onClick={onClose}
+            style={{
+              marginLeft: 'auto',
+              color: '#6B7280',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '6px',
+              borderRadius: '6px',
+            }}
+          >
             <X size={17} />
           </button>
         )}
       </div>
 
-      {/* Nav */}
+      {/* Navigation */}
       <nav style={{ flex: 1, padding: '12px', overflowY: 'auto' }}>
-        <div style={{ fontSize: '9px', color: '#6B7280', letterSpacing: '2px', textTransform: 'uppercase', padding: '4px 10px 10px' }}>
+        <div
+          style={{
+            fontSize: '9px',
+            color: '#6B7280',
+            letterSpacing: '2px',
+            textTransform: 'uppercase',
+            padding: '4px 10px 10px',
+          }}
+        >
           Region Management
         </div>
         {navItems.map((item) => {
@@ -84,13 +149,20 @@ function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () 
               href={item.href}
               onClick={onClose}
               style={{
-                display: 'flex', alignItems: 'center', gap: '11px',
-                padding: '10px 12px', borderRadius: '10px', marginBottom: '2px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '11px',
+                padding: '10px 12px',
+                borderRadius: '10px',
+                marginBottom: '2px',
                 textDecoration: 'none',
                 color: active ? '#ffffff' : '#9CA3AF',
-                background: active ? 'rgba(30,64,175,0.14)' : 'transparent',
-                border: active ? '1px solid rgba(30,64,175,0.28)' : '1px solid transparent',
-                transition: 'all 0.15s', fontSize: '13.5px', fontWeight: active ? '600' : '400',
+                background: active ? 'rgba(59,130,246,0.14)' : 'transparent',
+                border: active ? '1px solid rgba(59,130,246,0.22)' : '1px solid transparent',
+                backdropFilter: active ? 'blur(8px)' : 'none',
+                transition: 'all 0.15s',
+                fontSize: '13.5px',
+                fontWeight: active ? '600' : '400',
               }}
             >
               <item.icon size={17} style={{ color: active ? '#3B82F6' : '#6B7280', flexShrink: 0 }} />
@@ -99,25 +171,81 @@ function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () 
             </Link>
           )
         })}
+
+        <div
+          style={{
+            marginTop: '16px',
+            fontSize: '9px',
+            color: '#6B7280',
+            letterSpacing: '2px',
+            textTransform: 'uppercase',
+            padding: '4px 10px 10px',
+          }}
+        >
+          System
+        </div>
+        <Link
+          href="/region/settings"
+          onClick={onClose}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '11px',
+            padding: '10px 12px',
+            borderRadius: '10px',
+            textDecoration: 'none',
+            color: pathname.startsWith('/region/settings') ? '#ffffff' : '#9CA3AF',
+            background: pathname.startsWith('/region/settings') ? 'rgba(59,130,246,0.14)' : 'transparent',
+            border: pathname.startsWith('/region/settings')
+              ? '1px solid rgba(59,130,246,0.22)'
+              : '1px solid transparent',
+            transition: 'all 0.15s',
+            fontSize: '13.5px',
+            fontWeight: pathname.startsWith('/region/settings') ? '600' : '400',
+          }}
+        >
+          <Settings size={17} style={{ color: pathname.startsWith('/region/settings') ? '#3B82F6' : '#6B7280', flexShrink: 0 }} />
+          <span style={{ flex: 1 }}>Settings</span>
+          {pathname.startsWith('/region/settings') && <ChevronRight size={13} style={{ color: '#3B82F6', opacity: 0.7 }} />}
+        </Link>
       </nav>
 
-      {/* Footer */}
+      {/* User footer */}
       <div style={{ padding: '12px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <div style={{ padding: '6px 12px 8px', overflow: 'hidden' }}>
           <div style={{ fontSize: '13px', fontWeight: '600', color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {session?.user?.name ?? 'Region Admin'}
           </div>
-          <div style={{ fontSize: '11px', color: '#3B82F6', fontWeight: '400' }}>regionAdmin</div>
+          <div style={{ fontSize: '11px', color: '#3B82F6', textTransform: 'capitalize', fontWeight: '400' }}>
+            regionAdmin
+          </div>
         </div>
         <button
           onClick={handleSignOut}
           style={{
-            width: '100%', display: 'flex', alignItems: 'center', gap: '8px',
-            padding: '9px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)',
-            background: 'transparent', color: '#6B7280', fontSize: '13px', cursor: 'pointer', transition: 'all 0.15s',
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '9px 12px',
+            borderRadius: '8px',
+            border: '1px solid rgba(255,255,255,0.06)',
+            background: 'transparent',
+            color: '#6B7280',
+            fontSize: '13px',
+            cursor: 'pointer',
+            transition: 'all 0.15s',
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(204,0,0,0.1)'; e.currentTarget.style.color = '#CC0000' }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#6B7280' }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'rgba(59,130,246,0.1)'
+            e.currentTarget.style.color = '#3B82F6'
+            e.currentTarget.style.borderColor = 'rgba(59,130,246,0.22)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'transparent'
+            e.currentTarget.style.color = '#6B7280'
+            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'
+          }}
         >
           <LogOut size={14} />
           Sign out
@@ -154,41 +282,68 @@ function ProfileMenu() {
     <div ref={ref} style={{ position: 'relative' }}>
       <button
         onClick={() => setOpen((o) => !o)}
-        style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 6px', borderRadius: '10px', transition: 'background 0.15s' }}
+        style={{
+          display: 'flex', alignItems: 'center', gap: '8px',
+          background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 6px',
+          borderRadius: '10px', transition: 'background 0.15s',
+        }}
         onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
         onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
       >
         <div className="hidden sm:block" style={{ textAlign: 'right' }}>
           <div style={{ fontSize: '13px', fontWeight: '600', color: '#ffffff', lineHeight: '1.2', whiteSpace: 'nowrap' }}>{name}</div>
-          <div style={{ fontSize: '11px', fontWeight: '400', color: '#3B82F6', lineHeight: '1.2' }}>regionAdmin</div>
+          <div style={{ fontSize: '11px', fontWeight: '400', color: '#3B82F6', lineHeight: '1.2' }}>Region Admin</div>
         </div>
-        <div style={{
-          width: '34px', height: '34px', borderRadius: '50%', flexShrink: 0,
-          background: open ? 'rgba(59,130,246,0.25)' : 'rgba(59,130,246,0.12)',
-          border: `2px solid ${open ? 'rgba(59,130,246,0.6)' : 'rgba(59,130,246,0.28)'}`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontWeight: '700', fontSize: '14px', color: '#3B82F6', transition: 'all 0.15s',
-        }}>
+        <div
+          style={{
+            width: '34px', height: '34px', borderRadius: '50%', flexShrink: 0,
+            background: open ? 'rgba(59,130,246,0.25)' : 'rgba(59,130,246,0.12)',
+            border: `2px solid ${open ? 'rgba(59,130,246,0.6)' : 'rgba(59,130,246,0.28)'}`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontWeight: '700', fontSize: '14px', color: '#3B82F6', transition: 'all 0.15s',
+          }}
+        >
           {initials}
         </div>
       </button>
 
       {open && (
         <div style={{
-          position: 'absolute', top: 'calc(100% + 8px)', right: 0, width: '200px', zIndex: 200,
-          background: 'rgba(8,12,24,0.97)', backdropFilter: 'blur(24px)',
+          position: 'absolute', top: 'calc(100% + 8px)', right: 0,
+          width: '220px', zIndex: 200,
+          background: 'rgba(8,12,24,0.97)',
+          backdropFilter: 'blur(24px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(24px) saturate(180%)',
           borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)',
-          boxShadow: '0 16px 48px rgba(0,0,0,0.6)', overflow: 'hidden',
+          boxShadow: '0 16px 48px rgba(0,0,0,0.6)',
+          overflow: 'hidden',
         }}>
           <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-            <div style={{ fontSize: '14px', fontWeight: '700', color: '#ffffff' }}>{name}</div>
-            <div style={{ fontSize: '12px', color: '#3B82F6', fontWeight: '600' }}>Region Admin</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{
+                width: '38px', height: '38px', borderRadius: '50%', flexShrink: 0,
+                background: 'rgba(59,130,246,0.12)', border: '2px solid rgba(59,130,246,0.28)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontWeight: '700', fontSize: '16px', color: '#3B82F6',
+              }}>
+                {initials}
+              </div>
+              <div style={{ overflow: 'hidden' }}>
+                <div style={{ fontSize: '14px', fontWeight: '700', color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</div>
+                <div style={{ fontSize: '12px', color: '#3B82F6', fontWeight: '600' }}>Region Admin</div>
+              </div>
+            </div>
           </div>
           <div style={{ padding: '6px' }}>
             <Link
               href="/region/settings"
               onClick={() => setOpen(false)}
-              style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '8px', textDecoration: 'none', color: '#9CA3AF', fontSize: '14px', fontWeight: '600' }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '10px',
+                padding: '10px 12px', borderRadius: '8px', textDecoration: 'none',
+                color: '#9CA3AF', fontSize: '14px', fontWeight: '600',
+                transition: 'all 0.12s',
+              }}
               onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#ffffff' }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#9CA3AF' }}
             >
@@ -200,13 +355,15 @@ function ProfileMenu() {
               onClick={handleSignOut}
               style={{
                 width: '100%', display: 'flex', alignItems: 'center', gap: '10px',
-                padding: '10px 12px', borderRadius: '8px', background: 'transparent', border: 'none',
-                color: '#9CA3AF', fontSize: '14px', fontWeight: '600', cursor: 'pointer', textAlign: 'left',
+                padding: '10px 12px', borderRadius: '8px',
+                background: 'transparent', border: 'none',
+                color: '#9CA3AF', fontSize: '14px', fontWeight: '600',
+                cursor: 'pointer', transition: 'all 0.12s', textAlign: 'left',
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(204,0,0,0.1)'; e.currentTarget.style.color = '#CC0000' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(239,68,68,0.1)'; e.currentTarget.style.color = '#EF4444' }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#9CA3AF' }}
             >
-              <LogOut size={15} style={{ color: '#CC0000' }} />
+              <LogOut size={15} style={{ color: '#EF4444' }} />
               Sign Out
             </button>
           </div>
@@ -216,68 +373,192 @@ function ProfileMenu() {
   )
 }
 
+function MobileBottomNav({ pathname }: { pathname: string }) {
+  return (
+    <nav
+      className="lg:hidden glass-nav"
+      style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 40,
+        borderTop: '1px solid rgba(255,255,255,0.07)',
+        display: 'flex',
+        alignItems: 'stretch',
+        paddingBottom: 'env(safe-area-inset-bottom)',
+      }}
+    >
+      {bottomNavItems.map((item) => {
+        const active = isActive(item, pathname)
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            style={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '4px',
+              padding: '10px 2px 12px',
+              textDecoration: 'none',
+              color: active ? '#3B82F6' : '#6B7280',
+              transition: 'color 0.18s',
+              WebkitTapHighlightColor: 'transparent',
+            }}
+          >
+            <div
+              className="bottom-nav-pill"
+              style={{
+                background: active ? 'rgba(59,130,246,0.15)' : 'transparent',
+                borderColor: active ? 'rgba(59,130,246,0.22)' : 'transparent',
+                boxShadow: active ? '0 0 14px rgba(59,130,246,0.28)' : 'none',
+              }}
+            >
+              <item.icon size={21} strokeWidth={active ? 2.2 : 1.8} />
+            </div>
+            <span
+              style={{
+                fontSize: '9px',
+                fontWeight: active ? '700' : '400',
+                letterSpacing: '0.5px',
+                textTransform: 'uppercase',
+                opacity: active ? 1 : 0.55,
+                transition: 'all 0.18s',
+              }}
+            >
+              {item.label}
+            </span>
+          </Link>
+        )
+      })}
+    </nav>
+  )
+}
+
 export default function RegionLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
 
-  useEffect(() => { setMobileOpen(false) }, [pathname])
+  useEffect(() => {
+    setMobileOpen(false)
+  }, [pathname])
 
   return (
-    <div style={{ display: 'flex', height: '100dvh', backgroundColor: '#0A0F1E', overflow: 'hidden' }}>
+    <div
+      style={{
+        display: 'flex',
+        height: '100dvh',
+        backgroundColor: '#0A0F1E',
+        overflow: 'hidden',
+      }}
+    >
       {/* Desktop sidebar */}
       <div style={{ width: '240px', flexShrink: 0, height: '100%' }} className="hidden lg:block">
         <SidebarContent pathname={pathname} />
       </div>
 
-      {/* Mobile drawer */}
+      {/* Mobile drawer overlay */}
       {mobileOpen && (
         <div
-          style={{ position: 'fixed', inset: 0, zIndex: 50, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex' }}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 50,
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+          }}
           onClick={() => setMobileOpen(false)}
         >
-          <div style={{ width: '260px', height: '100%' }} onClick={(e) => e.stopPropagation()}>
+          <div
+            style={{ width: '260px', height: '100%' }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <SidebarContent pathname={pathname} onClose={() => setMobileOpen(false)} />
           </div>
         </div>
       )}
 
-      {/* Main */}
+      {/* Main content column */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
+
         {/* Desktop topbar */}
-        <div className="hidden lg:flex glass-topbar" style={{ height: '52px', borderBottom: '1px solid rgba(255,255,255,0.06)', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', flexShrink: 0 }}>
+        <div
+          className="hidden lg:flex glass-topbar"
+          style={{
+            height: '52px',
+            borderBottom: '1px solid rgba(255,255,255,0.06)',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '0 20px',
+            flexShrink: 0,
+            gap: '12px',
+          }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#3B82F6' }} />
             <span style={{ fontSize: '12px', color: '#6B7280', letterSpacing: '1px', textTransform: 'uppercase' }}>Region Admin Portal</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <Link href="/region/chapters/new" style={{
-              display: 'flex', alignItems: 'center', gap: '6px',
-              padding: '7px 14px', borderRadius: '8px', textDecoration: 'none',
-              background: 'rgba(30,64,175,0.15)', border: '1px solid rgba(59,130,246,0.25)',
-              color: '#3B82F6', fontSize: '13px', fontWeight: '600', transition: 'all 0.15s',
-            }}>
-              <Plus size={14} /> New Chapter
-            </Link>
-            <ProfileMenu />
-          </div>
+          <ProfileMenu />
         </div>
 
-        {/* Mobile topbar */}
-        <div className="flex lg:hidden glass-topbar" style={{ height: '52px', borderBottom: '1px solid rgba(255,255,255,0.06)', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px', flexShrink: 0 }}>
-          <button onClick={() => setMobileOpen(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', padding: '6px' }}>
-            <Building2 size={20} />
+        {/* Mobile top bar */}
+        <div
+          className="flex lg:hidden glass-topbar"
+          style={{
+            height: '52px',
+            borderBottom: '1px solid rgba(255,255,255,0.06)',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '0 16px',
+            flexShrink: 0,
+            position: 'relative',
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: '1px',
+              background: 'linear-gradient(90deg, transparent, rgba(59,130,246,0.5), rgba(201,168,76,0.5), transparent)',
+            }}
+          />
+          <button
+            onClick={() => setMobileOpen(true)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', padding: '6px' }}
+          >
+            <Menu size={20} />
           </button>
-          <div style={{ fontFamily: 'var(--font-bebas), sans-serif', fontSize: '20px', letterSpacing: '3px', color: '#ffffff' }}>
+          <div
+            style={{
+              fontFamily: 'var(--font-bebas), sans-serif',
+              fontSize: '22px',
+              letterSpacing: '3px',
+              color: '#ffffff',
+            }}
+          >
             BNI <span style={{ color: '#3B82F6' }}>REGION</span>
           </div>
           <ProfileMenu />
         </div>
 
-        {/* Content */}
-        <main style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '16px' }}>
+        {/* Page content */}
+        <main
+          style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '16px' }}
+        >
           {children}
+          {/* Bottom nav spacer — mobile only */}
+          <div className="lg:hidden" style={{ height: '72px' }} />
         </main>
       </div>
+
+      {/* Mobile bottom navigation */}
+      <MobileBottomNav pathname={pathname} />
     </div>
   )
 }

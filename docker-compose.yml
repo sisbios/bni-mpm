@@ -24,18 +24,18 @@ services:
       timeout: 5s
       retries: 5
 
+  # Chapter dashboard — serves oscar.sisbios.cloud, <chapter>.sisbios.cloud
   app:
     image: bni-mpm:local
     container_name: bni-mpm
     restart: unless-stopped
     environment:
       - DATABASE_URL=postgresql://bni:${POSTGRES_PASSWORD}@postgres:5432/bni
-      - NEXTAUTH_URL=${NEXTAUTH_URL}
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-https://oscar.sisbios.cloud}
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
       - NODE_ENV=production
-      - DOMAIN_BASE=${DOMAIN_BASE:-bni.sisbios.cloud}
-      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
-      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+      - DOMAIN_BASE=${DOMAIN_BASE:-sisbios.cloud}
+      - BNI_APP_MODE=chapter
     ports:
       - "127.0.0.1:3005:3000"
     depends_on:
@@ -46,6 +46,29 @@ services:
         limits:
           cpus: '1.00'
           memory: 1G
+
+  # Regional admin dashboard — serves bnimpm.sisbios.cloud only
+  region:
+    image: bni-mpm:local
+    container_name: bni-region
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://bni:${POSTGRES_PASSWORD}@postgres:5432/bni
+      - NEXTAUTH_URL=${REGION_URL:-https://bnimpm.sisbios.cloud}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - NODE_ENV=production
+      - DOMAIN_BASE=__none__
+      - BNI_APP_MODE=region
+    ports:
+      - "127.0.0.1:3006:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
 
 volumes:
   postgres-data:
