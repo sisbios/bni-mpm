@@ -14,12 +14,12 @@ type Event = {
 }
 
 const EVENT_TYPES = [
-  { value: 'chapter', label: 'Chapter Meeting', color: '#3B82F6' },
-  { value: 'regional', label: 'Regional', color: '#8B5CF6' },
-  { value: 'training', label: 'Training', color: '#10B981' },
-  { value: 'social', label: 'Social', color: '#F59E0B' },
-  { value: 'trip', label: 'Trip', color: '#EC4899' },
-  { value: 'international', label: 'International', color: '#C9A84C' },
+  { value: 'chapter',       label: 'Chapter Meeting', color: '#3B82F6' },
+  { value: 'training',      label: 'Training',        color: '#10B981' },
+  { value: 'social',        label: 'Social',          color: '#F59E0B' },
+  { value: 'trip',          label: 'Trip',            color: '#EC4899' },
+  { value: 'international', label: 'International',   color: '#C9A84C' },
+  // 'regional' excluded — regional events are created from the Region dashboard only
 ]
 
 function getEventColor(type: string) {
@@ -590,91 +590,78 @@ function EventRow({
   )
 }
 
-function EventFormModal({
-  editingEvent,
-  onClose,
-  onSuccess,
-}: {
+function EventFormModal({ editingEvent, onClose, onSuccess }: {
   editingEvent: Event | null
   onClose: () => void
   onSuccess: (event: Event) => void
 }) {
-  const formatDateInput = (d: Date) => {
-    const y = d.getFullYear()
-    const m = String(d.getMonth() + 1).padStart(2, '0')
-    const day = String(d.getDate()).padStart(2, '0')
-    return `${y}-${m}-${day}`
-  }
+  const fmt = (d: Date) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
 
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({
-    date: editingEvent ? formatDateInput(new Date(editingEvent.date)) : formatDateInput(new Date()),
-    title: editingEvent?.title ?? '',
-    subtitle: editingEvent?.subtitle ?? '',
+    date:      editingEvent ? fmt(new Date(editingEvent.date)) : fmt(new Date()),
+    title:     editingEvent?.title ?? '',
+    subtitle:  editingEvent?.subtitle ?? '',
     eventType: editingEvent?.eventType ?? 'chapter',
   })
+
+  function set(k: string, v: string) { setForm((p) => ({ ...p, [k]: v })) }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
-    const url = editingEvent ? `/api/events/${editingEvent.id}` : '/api/events'
-    const method = editingEvent ? 'PATCH' : 'POST'
-    const res = await fetch(url, {
-      method,
+    const res = await fetch(editingEvent ? `/api/events/${editingEvent.id}` : '/api/events', {
+      method: editingEvent ? 'PATCH' : 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...form, tags: '[]', colors: '[]' }),
     })
     setLoading(false)
     if (res.ok) onSuccess(await res.json())
-    else {
-      const err = await res.json()
-      toast.error(err.error || 'Failed to save')
-    }
+    else { const err = await res.json(); toast.error(err.error || 'Failed to save') }
   }
 
-  const inputStyle: React.CSSProperties = {
-    width: '100%', padding: '11px 14px', borderRadius: '8px',
-    border: '1px solid rgba(255,255,255,0.08)', backgroundColor: 'rgba(6,10,20,0.6)',
-    color: '#ffffff', fontSize: '17px', outline: 'none',
-    boxSizing: 'border-box', fontFamily: 'var(--font-montserrat), sans-serif',
+  const inp: React.CSSProperties = {
+    width: '100%', padding: '8px 10px', borderRadius: '7px',
+    border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(6,10,20,0.6)',
+    color: '#ffffff', fontSize: '13px', outline: 'none', boxSizing: 'border-box',
   }
+  const lbl: React.CSSProperties = { display: 'block', fontSize: '10px', color: '#6B7280', marginBottom: '4px', fontWeight: '600', letterSpacing: '0.5px', textTransform: 'uppercase' }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '20px' }} onClick={onClose}>
-      <div style={{ background: 'rgba(10,15,28,0.90)', backdropFilter: 'blur(28px) saturate(160%)', WebkitBackdropFilter: 'blur(28px) saturate(160%)', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.09)', boxShadow: '0 24px 64px rgba(0,0,0,0.6)', padding: '28px', width: '100%', maxWidth: '460px' }} onClick={(e) => e.stopPropagation()}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-          <h2 style={{ fontFamily: 'var(--font-bebas), sans-serif', fontSize: '22px', letterSpacing: '2px', color: '#ffffff' }}>
-            {editingEvent ? 'EDIT EVENT' : 'ADD EVENT'}
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '16px' }} onClick={onClose}>
+      <div style={{ background: 'rgba(10,15,28,0.97)', backdropFilter: 'blur(28px) saturate(160%)', WebkitBackdropFilter: 'blur(28px) saturate(160%)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)', padding: '20px', width: '100%', maxWidth: '380px' }} onClick={(e) => e.stopPropagation()}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <h2 style={{ fontFamily: 'var(--font-bebas), sans-serif', fontSize: '18px', letterSpacing: '2px', color: '#ffffff', margin: 0 }}>
+            {editingEvent ? 'EDIT EVENT' : 'NEW EVENT'}
           </h2>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer' }}>
-            <X size={18} />
-          </button>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#4B5563', cursor: 'pointer', padding: '2px' }}><X size={15} /></button>
         </div>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '17px', color: '#6B7280', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' }}>Date *</label>
-            <input style={inputStyle} type="date" value={form.date} onChange={(e) => setForm((p) => ({ ...p, date: e.target.value }))} required />
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {/* Date + Type row */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            <div>
+              <label style={lbl}>Date *</label>
+              <input style={{ ...inp, colorScheme: 'dark' }} type="date" value={form.date} onChange={(e) => set('date', e.target.value)} required />
+            </div>
+            <div>
+              <label style={lbl}>Type</label>
+              <select style={{ ...inp, cursor: 'pointer', colorScheme: 'dark', background: '#0d1324' }} value={form.eventType} onChange={(e) => set('eventType', e.target.value)}>
+                {EVENT_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+              </select>
+            </div>
           </div>
           <div>
-            <label style={{ display: 'block', fontSize: '17px', color: '#6B7280', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' }}>Title *</label>
-            <input style={inputStyle} value={form.title} onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))} required placeholder="Chapter Weekly Meeting" />
+            <label style={lbl}>Title *</label>
+            <input style={inp} value={form.title} onChange={(e) => set('title', e.target.value)} required placeholder="e.g. Chapter Weekly Meeting" />
           </div>
           <div>
-            <label style={{ display: 'block', fontSize: '17px', color: '#6B7280', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' }}>Subtitle</label>
-            <input style={inputStyle} value={form.subtitle} onChange={(e) => setForm((p) => ({ ...p, subtitle: e.target.value }))} placeholder="Location or description" />
+            <label style={lbl}>Subtitle / Venue</label>
+            <input style={inp} value={form.subtitle} onChange={(e) => set('subtitle', e.target.value)} placeholder="Optional" />
           </div>
-          <div>
-            <label style={{ display: 'block', fontSize: '17px', color: '#6B7280', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' }}>Event Type</label>
-            <select style={{ ...inputStyle, cursor: 'pointer' }} value={form.eventType} onChange={(e) => setForm((p) => ({ ...p, eventType: e.target.value }))}>
-              {EVENT_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-            </select>
-          </div>
-          <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
-            <button type="button" onClick={onClose} style={{ flex: 1, padding: '12px', borderRadius: '8px', border: '1px solid #4B5563', backgroundColor: 'transparent', color: '#9CA3AF', fontSize: '17px', cursor: 'pointer' }}>
-              Cancel
-            </button>
-            <button type="submit" disabled={loading} style={{ flex: 1, padding: '12px', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #CC0000, #990000)', color: '#ffffff', fontSize: '17px', fontWeight: '700', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1 }}>
-              {loading ? 'Saving...' : editingEvent ? 'Update' : 'Create'}
+          <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+            <button type="button" onClick={onClose} style={{ flex: 1, padding: '9px', borderRadius: '7px', border: '1px solid rgba(255,255,255,0.07)', background: 'transparent', color: '#6B7280', fontSize: '13px', cursor: 'pointer' }}>Cancel</button>
+            <button type="submit" disabled={loading} style={{ flex: 2, padding: '9px', borderRadius: '7px', border: 'none', background: loading ? 'rgba(153,0,0,0.6)' : 'linear-gradient(135deg, #CC0000, #990000)', color: '#fff', fontSize: '13px', fontWeight: '700', cursor: loading ? 'not-allowed' : 'pointer' }}>
+              {loading ? 'Saving…' : editingEvent ? 'Update' : 'Create'}
             </button>
           </div>
         </form>
