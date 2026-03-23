@@ -8,8 +8,10 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   if (( session.user.accessLevel ?? 'member') === 'member') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
+  const chapterId = session.user.chapterId
+
   const members = await db.user.findMany({
-    where: { isActive: true },
+    where: { isActive: true, chapterId },
     orderBy: { name: 'asc' },
     select: {
       id: true,
@@ -39,6 +41,8 @@ export async function POST(request: Request) {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   if (( session.user.accessLevel ?? 'member') === 'member') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
+  const chapterId = session.user.chapterId
+
   const body = await request.json()
   const { name, email, phone, business, category, role, password } = body
 
@@ -63,6 +67,7 @@ export async function POST(request: Request) {
       category,
       role: role || 'member',
       password: hashedPassword,
+      chapterId,
     },
     select: {
       id: true,

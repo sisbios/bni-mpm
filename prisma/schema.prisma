@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,6 +5,41 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+// ── Multi-tenant hierarchy ───────────────────────────────────────────────────
+
+model Region {
+  id        String   @id @default(cuid())
+  name      String   // e.g. "BNI South Kerala"
+  slug      String   @unique // e.g. "bni-south"
+  logoUrl   String?
+  settings  String   @default("{}") // JSON
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  chapters Chapter[]
+}
+
+model Chapter {
+  id          String   @id @default(cuid())
+  regionId    String
+  name        String   // e.g. "Oscar"
+  slug        String   @unique // e.g. "oscar"
+  city        String?
+  meetingDay  String?  // e.g. "Tuesday"
+  meetingTime String?  // e.g. "07:00"
+  logoUrl     String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  region Region @relation(fields: [regionId], references: [id])
+
+  @@index([regionId])
+}
+
+// ── Core models (all scoped by chapterId) ────────────────────────────────────
 
 model User {
   id        String   @id @default(cuid())
@@ -25,7 +55,13 @@ model User {
   address           String?
   isActive  Boolean  @default(true)
   membershipValidTill DateTime?
-  joinedAt  DateTime?        // manually editable joining date; falls back to createdAt for display
+  joinedAt  DateTime?
+
+  // Multi-tenant fields
+  chapterId   String?
+  regionId    String?  // set only for regionAdmin / platform roles
+  accessLevel String   @default("member") // platform | regionAdmin | superadmin | officer | member
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -39,15 +75,18 @@ model User {
   memberPins    MemberPin[]
   visitors      Visitor[]   @relation("VisitorReferrer")
   businessGoals BusinessGoal[]
+
+  @@index([chapterId])
 }
 
 model Event {
   id        String   @id @default(cuid())
+  chapterId String?
   date      DateTime
   title     String
   subtitle  String?
-  tags      String   @default("[]") // JSON array of tag labels
-  colors    String   @default("[]") // JSON array of hex colors
+  tags      String   @default("[]")
+  colors    String   @default("[]")
   eventType String   @default("chapter") // chapter | regional | training | social | trip | international
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
@@ -57,10 +96,12 @@ model Event {
   meetingSlots MeetingSlot[]
 
   @@index([date])
+  @@index([chapterId])
 }
 
 model EventRSVP {
   id        String   @id @default(cuid())
+  chapterId String?
   userId    String
   eventId   String
   status    String   @default("pending") // pending | confirmed | declined | maybe
@@ -72,16 +113,18 @@ model EventRSVP {
   event Event @relation(fields: [eventId], references: [id])
 
   @@unique([userId, eventId])
+  @@index([chapterId])
 }
 
 model WeeklyTask {
   id          String   @id @default(cuid())
+  chapterId   String?
   userId      String
-  week        String   // ISO week string e.g. "2026-W15"
-  taskType    String   @default("call") // call | followup | visit | referral
+  week        String
+  taskType    String   @default("call")
   contactName String
   phone       String?
-  status      String   @default("pending") // pending | done | no-answer | callback
+  status      String   @default("pending")
   notes       String?
   allocatedBy String?
   contactSphereId String?
@@ -94,12 +137,14 @@ model WeeklyTask {
   contactSphereEntry ContactSphere? @relation(fields: [contactSphereId], references: [id], onDelete: SetNull)
 
   @@index([userId, week])
+  @@index([chapterId])
 }
 
 model GreenAchievement {
   id          String   @id @default(cuid())
+  chapterId   String?
   userId      String
-  category    String   // referral | testimonial | one-to-one | visitor | tyfcb | training
+  category    String
   description String?
   points      Int      @default(1)
   date        DateTime @default(now())
@@ -110,16 +155,18 @@ model GreenAchievement {
   user User @relation(fields: [userId], references: [id])
 
   @@index([userId])
+  @@index([chapterId])
 }
 
 model BusinessGoal {
   id          String    @id @default(cuid())
+  chapterId   String?
   userId      String
-  type        String    // 'achievement' | 'milestone'
+  type        String
   title       String
   description String?
-  category    String    @default("other") // sales | growth | team | product | award | other
-  status      String    @default("upcoming") // upcoming | in_progress | achieved
+  category    String    @default("other")
+  status      String    @default("upcoming")
   targetDate  DateTime?
   achievedAt  DateTime?
   createdAt   DateTime  @default(now())
@@ -128,17 +175,19 @@ model BusinessGoal {
   user User @relation(fields: [userId], references: [id])
 
   @@index([userId])
+  @@index([chapterId])
 }
 
 model ContactSphere {
   id           String   @id @default(cuid())
+  chapterId    String?
   userId       String
   contactName  String
   phone        String?
   email        String?
   business     String?
-  relationship String? // friend | family | colleague | client | vendor | neighbor
-  category     String? // prospect | personal | business | professional | neighbor
+  relationship String?
+  category     String?
   address      String?
   notes        String?
   createdAt    DateTime @default(now())
@@ -148,10 +197,12 @@ model ContactSphere {
   allocations WeeklyTask[]
 
   @@index([userId])
+  @@index([chapterId])
 }
 
 model AuditLog {
   id        String   @id @default(cuid())
+  chapterId String?
   userId    String
   action    String
   entity    String
@@ -160,46 +211,56 @@ model AuditLog {
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
+
+  @@index([chapterId])
 }
 
 model ChapterSetting {
   id        String   @id @default(cuid())
-  key       String   @unique
+  chapterId String?
+  key       String
   value     String
   updatedAt DateTime @updatedAt
+
+  // key is unique per chapter (not globally)
+  @@unique([chapterId, key])
 }
 
 model ChapterRole {
   id          String   @id @default(cuid())
-  slug        String   @unique
+  chapterId   String?
+  slug        String
   label       String
   color       String   @default("#9CA3AF")
-  accessLevel String   @default("member") // superadmin | officer | member
-  group       String   @default("member") // superadmin | headtable | committee | member
+  accessLevel String   @default("member")
+  group       String   @default("member")
   sortOrder   Int      @default(99)
   isSystem    Boolean  @default(false)
   createdAt   DateTime @default(now())
+
+  // slug unique per chapter
+  @@unique([chapterId, slug])
+  @@index([chapterId])
 }
 
 model PalmsEntry {
   id          String   @id @default(cuid())
+  chapterId   String?
   userId      String
-  week        String   // ISO week "2026-W12"
-  weekDate    DateTime // Monday of that week
+  week        String
+  weekDate    DateTime
 
-  // Attendance
   attended    Boolean  @default(false)
-  substitute  Boolean  @default(false) // sent a substitute
-  late        Boolean  @default(false) // late arrival or early departure
-  medical     Boolean  @default(false) // medical absence — exempt from absence penalty
+  substitute  Boolean  @default(false)
+  late        Boolean  @default(false)
+  medical     Boolean  @default(false)
 
-  // Activities
   referrals    Int      @default(0)
   visitors     Int      @default(0)
   testimonials Int      @default(0)
-  oneToOnes    Int      @default(0) // kept for legacy / 1-2-1 tracking
-  ceus         Int      @default(0) // training sessions
-  tyfcbAmount  Float    @default(0) // in rupees
+  oneToOnes    Int      @default(0)
+  ceus         Int      @default(0)
+  tyfcbAmount  Float    @default(0)
 
   notes       String?
   createdBy   String?
@@ -211,11 +272,13 @@ model PalmsEntry {
   @@unique([userId, week])
   @@index([userId])
   @@index([week])
+  @@index([chapterId])
 }
 
 model BniPin {
   id          String   @id @default(cuid())
-  slug        String   @unique
+  chapterId   String?  // null = system-wide pin available to all chapters
+  slug        String
   label       String
   description String?
   icon        String   @default("🏅")
@@ -224,41 +287,47 @@ model BniPin {
   sortOrder   Int      @default(0)
 
   memberPins MemberPin[]
+
+  // slug unique per chapter (null chapterId = global)
+  @@unique([chapterId, slug])
+  @@index([chapterId])
 }
 
 model MemberPin {
   id         String   @id @default(cuid())
+  chapterId  String?
   userId     String
-  pinSlug    String
+  pinId      String   // FK to BniPin.id (was pinSlug — updated for multi-tenant)
   awardedBy  String?
   awardedAt  DateTime @default(now())
   notes      String?
 
   user User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  pin  BniPin @relation(fields: [pinSlug], references: [slug], onDelete: Cascade)
+  pin  BniPin @relation(fields: [pinId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, pinSlug])
+  @@unique([userId, pinId])
   @@index([userId])
+  @@index([chapterId])
 }
 
 model Visitor {
   id           String   @id @default(cuid())
+  chapterId    String?
   name         String
   phone        String?
   email        String?
   business     String?
   category     String?
 
-  referrerId   String           // member who brought them
+  referrerId   String
   visitDate    DateTime
-  week         String           // ISO week "2026-W12"
-  weekDate     DateTime         // Monday of that week
+  week         String
+  weekDate     DateTime
 
   eoiSubmitted Boolean  @default(false)
   eoiDate      DateTime?
 
-  fromContactId String?          // ContactSphere.id if imported from contact pool
-
+  fromContactId String?
   notes        String?
   createdBy    String?
   createdAt    DateTime @default(now())
@@ -268,17 +337,19 @@ model Visitor {
 
   @@index([referrerId])
   @@index([week])
+  @@index([chapterId])
 }
 
 model MeetingSlot {
   id               String   @id @default(cuid())
+  chapterId        String?
   eventId          String
-  slotType         String   // 'edu_slot' | 'feature_presentation'
-  slotNumber       Int      @default(1) // 1 for edu; 1 or 2 for feature presentations
+  slotType         String
+  slotNumber       Int      @default(1)
   assignedUserId   String?
   assignedUserName String?
   topic            String?
-  status           String   @default("pending") // pending | confirmed | completed
+  status           String   @default("pending")
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -287,4 +358,5 @@ model MeetingSlot {
 
   @@index([eventId])
   @@index([assignedUserId])
+  @@index([chapterId])
 }

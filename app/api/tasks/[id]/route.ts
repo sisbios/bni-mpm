@@ -9,12 +9,14 @@ export async function PATCH(
   const session = await auth()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const chapterId = session.user.chapterId
+
   const { id } = await params
   const body = await request.json()
 
   // Fetch existing task to check ownership
   const existing = await db.weeklyTask.findUnique({ where: { id } })
-  if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  if (!existing || existing.chapterId !== chapterId) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   // Members can only update their own tasks
   if (( session.user.accessLevel ?? 'member') === 'member' && existing.userId !== session.user.id) {
@@ -53,7 +55,13 @@ export async function DELETE(
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   if (( session.user.accessLevel ?? 'member') === 'member') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
+  const chapterId = session.user.chapterId
+
   const { id } = await params
+
+  const existing = await db.weeklyTask.findUnique({ where: { id } })
+  if (!existing || existing.chapterId !== chapterId) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
   await db.weeklyTask.delete({ where: { id } })
   return NextResponse.json({ success: true })
 }

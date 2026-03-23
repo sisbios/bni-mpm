@@ -21,11 +21,15 @@ const STANDARD_ROLES = [
 
 async function main() {
   for (const role of STANDARD_ROLES) {
-    await db.chapterRole.upsert({
-      where: { slug: role.slug },
-      update: { label: role.label, color: role.color, accessLevel: role.accessLevel },
-      create: role,
-    })
+    const existing = await db.chapterRole.findFirst({ where: { slug: role.slug } })
+    if (existing) {
+      await db.chapterRole.update({
+        where: { id: existing.id },
+        data: { label: role.label, color: role.color, accessLevel: role.accessLevel },
+      })
+    } else {
+      await db.chapterRole.create({ data: role })
+    }
   }
   console.log('Roles seeded')
 }

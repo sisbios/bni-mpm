@@ -6,6 +6,8 @@ declare module 'next-auth' {
       id: string
       role: string
       accessLevel: string
+      chapterId: string | null
+      regionId: string | null
     } & DefaultSession['user']
   }
 }

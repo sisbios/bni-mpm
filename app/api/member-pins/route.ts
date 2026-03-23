@@ -6,11 +6,16 @@ export async function GET(request: Request) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const chapterId = session.user.chapterId
+
   const { searchParams } = new URL(request.url)
   const userId = searchParams.get('userId')
 
   const memberPins = await db.memberPin.findMany({
-    where: userId ? { userId } : undefined,
+    where: {
+      chapterId,
+      ...(userId ? { userId } : {}),
+    },
     include: {
       pin: true,
       user: { select: { id: true, name: true } },
@@ -32,20 +37,32 @@ export async function POST(request: Request) {
 
   if (!canAward) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const body = await request.json()
-  const { userId, pinSlug, notes } = body
+  const chapterId = session.user.chapterId
 
-  if (!userId || !pinSlug) {
-    return NextResponse.json({ error: 'userId and pinSlug are required' }, { status: 400 })
+  const body = await request.json()
+  const { userId, pinId, notes } = body
+
+  if (!userId || !pinId) {
+    return NextResponse.json({ error: 'userId and pinId are required' }, { status: 400 })
   }
 
+  // Verify the pin is available for this chapter (chapter-specific or system-wide)
+  const availablePin = await db.bniPin.findFirst({
+    where: {
+      id: pinId,
+      OR: [{ chapterId }, { chapterId: null, isSystem: true }],
+    },
+  })
+  if (!availablePin) return NextResponse.json({ error: 'Pin not found' }, { status: 404 })
+
   const pin = await db.memberPin.upsert({
-    where: { userId_pinSlug: { userId, pinSlug } },
+    where: { userId_pinId: { userId, pinId } },
     create: {
       userId,
-      pinSlug,
+      pinId,
       awardedBy: session.user.id,
       notes: notes ?? null,
+      chapterId,
     },
     update: {
       awardedBy: session.user.id,

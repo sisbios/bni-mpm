@@ -8,18 +8,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
+  const chapterId = session.user.chapterId
+
   const body = await request.json()
   const { week } = body
   if (!week) return NextResponse.json({ error: 'week is required' }, { status: 400 })
 
-  // Get all active members
+  // Get all active members in this chapter
   const members = await db.user.findMany({
-    where: { isActive: true },
+    where: { isActive: true, chapterId },
     select: { id: true, name: true },
   })
 
-  // Get all contacts in the pool
+  // Get all contacts in the pool for this chapter
   const allContacts = await db.contactSphere.findMany({
+    where: { chapterId },
     include: { user: { select: { id: true, name: true } } },
   })
 
@@ -29,7 +32,7 @@ export async function POST(request: Request) {
 
   // Get already-assigned contact sphere tasks this week (to avoid duplicates)
   const existingTasks = await db.weeklyTask.findMany({
-    where: { week, contactSphereId: { not: null } },
+    where: { week, contactSphereId: { not: null }, chapterId },
     select: { userId: true, contactSphereId: true },
   })
 
@@ -38,7 +41,7 @@ export async function POST(request: Request) {
   // Track how many times each contact has been assigned total (for fair rotation)
   const assignmentCounts = await db.weeklyTask.groupBy({
     by: ['contactSphereId'],
-    where: { contactSphereId: { not: null } },
+    where: { contactSphereId: { not: null }, chapterId },
     _count: { contactSphereId: true },
   })
   const countMap = new Map(assignmentCounts.map((r) => [r.contactSphereId!, r._count.contactSphereId]))
@@ -77,6 +80,7 @@ export async function POST(request: Request) {
         contactSphereId: c.id,
         contributorId: c.userId,
         contributorName: c.user.name,
+        chapterId,
       })),
     })
 

@@ -5,10 +5,13 @@ import { NextResponse } from 'next/server'
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const chapterId = session.user.chapterId
+
   const { id } = await params
 
   const existing = await (db as any).businessGoal.findUnique({ where: { id } })
-  if (!existing || existing.userId !== session.user.id)
+  if (!existing || existing.userId !== session.user.id || existing.chapterId !== chapterId)
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   const body = await request.json()
@@ -29,10 +32,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const chapterId = session.user.chapterId
+
   const { id } = await params
 
   const existing = await (db as any).businessGoal.findUnique({ where: { id } })
-  if (!existing || existing.userId !== session.user.id)
+  if (!existing || existing.userId !== session.user.id || existing.chapterId !== chapterId)
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   await (db as any).businessGoal.delete({ where: { id } })

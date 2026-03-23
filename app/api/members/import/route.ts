@@ -18,6 +18,8 @@ export async function POST(request: Request) {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   if (( session.user.accessLevel ?? 'member') === 'member') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
+  const chapterId = session.user.chapterId
+
   const formData = await request.formData()
   const file = formData.get('file') as File | null
 
@@ -56,6 +58,7 @@ export async function POST(request: Request) {
         category: row.category?.trim() || null,
         role: row.role?.trim() || 'member',
         password: hashedPassword,
+        chapterId,
       }
     })
   )

@@ -10,9 +10,12 @@ export async function GET() {
     return new Response('Unauthorized', { status: 401 })
   }
 
+  const chapterId = session.user.chapterId
+
   const events = await db.event.findMany({
     where: {
       isActive: true,
+      chapterId,
       date: {
         gte: new Date('2026-04-01'),
         lte: new Date('2026-09-30'),

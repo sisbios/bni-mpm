@@ -6,6 +6,8 @@ export async function GET(request: Request) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const chapterId = session.user.chapterId
+
   const { searchParams } = new URL(request.url)
   const userId = searchParams.get('userId')
 
@@ -13,7 +15,10 @@ export async function GET(request: Request) {
   const targetUserId = ( session.user.accessLevel ?? 'member') === 'member' ? session.user.id : userId || undefined
 
   const achievements = await db.greenAchievement.findMany({
-    where: targetUserId ? { userId: targetUserId } : {},
+    where: {
+      ...(targetUserId ? { userId: targetUserId } : {}),
+      chapterId,
+    },
     include: {
       user: { select: { id: true, name: true, business: true } },
     },
@@ -26,6 +31,8 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const chapterId = session.user.chapterId
 
   const body = await request.json()
   const { userId, category, description, points, date } = body
@@ -46,6 +53,7 @@ export async function POST(request: Request) {
       date: date ? new Date(date) : new Date(),
       verified: ( session.user.accessLevel ?? 'member') !== 'member', // Auto-verify if admin creates
       verifiedBy: ( session.user.accessLevel ?? 'member') !== 'member' ? session.user.id : null,
+      chapterId,
     },
     include: {
       user: { select: { id: true, name: true, business: true } },

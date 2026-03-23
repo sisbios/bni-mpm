@@ -9,7 +9,7 @@ type BniPin = {
   id: string; slug: string; label: string; description: string | null; icon: string; color: string
 }
 type MemberPinData = {
-  id: string; pinSlug: string; pin: BniPin; awardedAt: string
+  id: string; pinId: string; pin: BniPin; awardedAt: string
 }
 type Role = {
   id: string; slug: string; label: string; color: string
@@ -92,17 +92,17 @@ export default function MemberProfileClient({
   const [savingEdit, setSavingEdit] = useState(false)
 
   const hex = TRAFFIC_COLORS[trafficScore.color]
-  const awardedSlugs = new Set(pins.map((p) => p.pinSlug))
+  const awardedIds = new Set(pins.map((p) => p.pinId))
 
-  async function awardPin(pinSlug: string) {
+  async function awardPin(pinId: string) {
     const res = await fetch('/api/member-pins', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: memberId, pinSlug }),
+      body: JSON.stringify({ userId: memberId, pinId }),
     })
     if (res.ok) {
       const data = await res.json()
-      setPins((prev) => [...prev, { id: data.id, pinSlug: data.pinSlug, pin: data.pin, awardedAt: data.awardedAt }])
+      setPins((prev) => [...prev, { id: data.id, pinId: data.pinId, pin: data.pin, awardedAt: data.awardedAt }])
       toast.success(`${data.pin.label} awarded to ${memberName}`)
     } else toast.error('Failed to award pin')
   }
@@ -445,7 +445,7 @@ export default function MemberProfileClient({
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {allPins.map((pin) => {
-                const hasPin = awardedSlugs.has(pin.slug)
+                const hasPin = awardedIds.has(pin.id)
                 return (
                   <div key={pin.slug} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderRadius: '8px', background: hasPin ? `${pin.color}12` : 'rgba(255,255,255,0.04)', border: `1px solid ${hasPin ? pin.color + '30' : 'rgba(255,255,255,0.08)'}` }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -458,7 +458,7 @@ export default function MemberProfileClient({
                     {hasPin ? (
                       <span style={{ fontSize: '11px', color: pin.color, fontWeight: '700' }}>✓ Awarded</span>
                     ) : (
-                      <button onClick={() => awardPin(pin.slug)}
+                      <button onClick={() => awardPin(pin.id)}
                         style={{ padding: '5px 12px', borderRadius: '6px', border: 'none', background: `${pin.color}20`, color: pin.color, cursor: 'pointer', fontSize: '12px', fontWeight: '700' }}>
                         Award
                       </button>

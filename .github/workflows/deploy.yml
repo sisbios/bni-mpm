@@ -22,10 +22,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: TypeScript type-check
-        run: npx tsc --noEmit
+      - name: Generate Prisma client
+        run: npx prisma generate
 
-      - name: Build check
+      - name: Build (includes type-check)
         env:
           DATABASE_URL: postgresql://bni:testpassword@localhost:5432/bni_test
           NEXTAUTH_URL: https://bni.sisbios.cloud
@@ -47,18 +47,22 @@ jobs:
             cd /root/bni-mpm
             git pull origin main
 
-            echo "=== Building Docker image ==="
-            docker build -t bni-mpm:local .
+            echo "=== Starting postgres if not running ==="
+            docker compose up -d postgres
+            sleep 5
 
-            echo "=== Restarting containers ==="
+            echo "=== Building Docker image ==="
+            docker build --network host -t bni-mpm:local .
+
+            echo "=== Restarting app ==="
             docker compose up -d --force-recreate app
 
             echo "=== Running DB migrations ==="
-            sleep 5
-            docker exec bni-mpm npx prisma migrate deploy || true
+            sleep 8
+            docker exec bni-mpm npx prisma db push || true
 
             echo "=== Health check ==="
-            sleep 8
+            sleep 5
             curl -sf http://localhost:3005 > /dev/null && echo "App is UP" || (echo "Health check FAILED" && exit 1)
 
             echo "=== Deploy complete ==="

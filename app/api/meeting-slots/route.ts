@@ -6,13 +6,15 @@ export async function GET(request: Request) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const chapterId = session.user.chapterId
+
   const { searchParams } = new URL(request.url)
   const eventId = searchParams.get('eventId')
   const userId = searchParams.get('userId')
   const upcoming = searchParams.get('upcoming')
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const where: any = {}
+  const where: any = { chapterId }
 
   if (eventId) {
     where.eventId = eventId

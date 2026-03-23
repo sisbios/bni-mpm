@@ -12,7 +12,9 @@ export async function GET() {
   const session = await auth()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const settings = await db.chapterSetting.findMany()
+  const chapterId = session.user.chapterId
+
+  const settings = await db.chapterSetting.findMany({ where: { chapterId } })
   const map = Object.fromEntries(settings.map((s) => [s.key, s.value]))
   return NextResponse.json(map)
 }
@@ -28,16 +30,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
+  const chapterId = session.user.chapterId
+
   const body = await request.json()
   const results: Record<string, string> = {}
 
   for (const [key, value] of Object.entries(body)) {
     if (typeof value !== 'string') continue
-    await db.chapterSetting.upsert({
-      where: { key },
-      update: { value },
-      create: { key, value },
-    })
+    const existing = await db.chapterSetting.findFirst({ where: { key, chapterId } })
+    if (existing) {
+      await db.chapterSetting.update({ where: { id: existing.id }, data: { value } })
+    } else {
+      await db.chapterSetting.create({ data: { key, value, chapterId } })
+    }
     results[key] = value
   }
 

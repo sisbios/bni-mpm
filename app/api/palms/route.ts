@@ -6,6 +6,8 @@ export async function GET(request: Request) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const chapterId = session.user.chapterId
+
   const { searchParams } = new URL(request.url)
   const userId = searchParams.get('userId')
   const week = searchParams.get('week')
@@ -18,7 +20,7 @@ export async function GET(request: Request) {
   const targetUserId =
     accessLevel === 'member' ? session.user.id : userId || undefined
 
-  const whereClause: Record<string, unknown> = {}
+  const whereClause: Record<string, unknown> = { chapterId }
   if (targetUserId) whereClause.userId = targetUserId
 
   if (week) {
@@ -50,6 +52,8 @@ export async function POST(request: Request) {
   if (accessLevel === 'member') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
+
+  const chapterId = session.user.chapterId
 
   const body = await request.json()
   const { userId, week, weekDate, attended, substitute, late, medical, referrals, visitors, testimonials, oneToOnes, ceus, tyfcbAmount, notes } = body
@@ -91,6 +95,7 @@ export async function POST(request: Request) {
       tyfcbAmount: tyfcbAmount ?? 0,
       notes: notes ?? null,
       createdBy: session.user.id,
+      chapterId,
     },
     update: updateData,
     include: {

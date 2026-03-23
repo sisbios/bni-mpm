@@ -47,15 +47,12 @@ jobs:
       - name: Push schema to test DB
         env:
           DATABASE_URL: postgresql://bni:testpassword@localhost:5432/bni_test
-        run: npx prisma db push --skip-generate
-
-      - name: TypeScript type-check
-        run: npx tsc --noEmit
+        run: npx prisma db push
 
       - name: Lint
         run: npm run lint || true
 
-      - name: Build
+      - name: Build (includes type-check)
         env:
           DATABASE_URL: postgresql://bni:testpassword@localhost:5432/bni_test
           NEXTAUTH_URL: http://localhost:3000
