@@ -10,7 +10,9 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url)
   const chapterId = searchParams.get('chapterId')
-  const scope = searchParams.get('scope') // 'regional' | 'chapter' | ''
+  const scope  = searchParams.get('scope') // 'regional' | 'chapter' | ''
+  const month  = searchParams.get('month')
+  const year   = searchParams.get('year')
 
   const chapters = await db.chapter.findMany({
     where: regionId ? { regionId } : undefined,
@@ -20,15 +22,23 @@ export async function GET(request: Request) {
   const chapterMap: Record<string, string> = {}
   for (const c of chapters) chapterMap[c.id] = c.name
 
-  const whereClause = scope === 'regional'
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let dateFilter: any = {}
+  if (month && year) {
+    const m = parseInt(month) - 1
+    const y = parseInt(year)
+    dateFilter = { date: { gte: new Date(y, m, 1), lte: new Date(y, m + 1, 0, 23, 59, 59) } }
+  }
+
+  const scopeClause = scope === 'regional'
     ? { regionId: regionId ?? undefined }
     : scope === 'chapter'
     ? { chapterId: { in: chapterIds } }
     : { OR: [{ chapterId: { in: chapterIds } }, ...(regionId ? [{ regionId }] : [])] }
 
   const events = await db.event.findMany({
-    where: whereClause as any,
-    orderBy: { date: 'desc' },
+    where: { ...scopeClause, ...dateFilter } as any,
+    orderBy: { date: 'asc' },
     select: { id: true, title: true, subtitle: true, date: true, eventType: true, isActive: true, chapterId: true, regionId: true, bookingRequired: true, _count: { select: { registrations: true } } },
   })
 
