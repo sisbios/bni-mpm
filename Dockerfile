@@ -1,16 +1,11 @@
-FROM bni-base:latest AS base
-
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
-
 # ── deps stage ──────────────────────────────────────────────────
-FROM base AS deps
+FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci
 
 # ── builder stage ────────────────────────────────────────────────
-FROM base AS builder
+FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -23,17 +18,21 @@ ENV DATABASE_URL=$DATABASE_URL
 RUN npx prisma generate
 RUN npm run build
 
-# ── runner stage ─────────────────────────────────────────────────
-FROM base AS runner
-WORKDIR /app
+# ── runner stage — uses bni-base:latest for Chromium/Puppeteer support ───────
+FROM bni-base:latest AS runner
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+USER root
+RUN addgroup --system --gid 1001 nodejs 2>/dev/null || true
+RUN adduser --system --uid 1001 nextjs 2>/dev/null || true
+
+# Wipe stale app files from base image, then lay in fresh build
+RUN rm -rf /app && mkdir /app
+WORKDIR /app
 
 # Chromium needs writable /tmp
 RUN mkdir -p /tmp/chromium && chown nextjs:nodejs /tmp/chromium
