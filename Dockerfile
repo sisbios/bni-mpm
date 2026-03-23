@@ -32,8 +32,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+USER root
+RUN addgroup --system --gid 1001 nodejs 2>/dev/null || true
+RUN adduser --system --uid 1001 nextjs 2>/dev/null || true
 
 # Chromium needs writable /tmp
 RUN mkdir -p /tmp/chromium && chown nextjs:nodejs /tmp/chromium
