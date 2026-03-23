@@ -222,16 +222,8 @@ function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () 
         </Link>
       </nav>
 
-      {/* User footer */}
+      {/* Footer — sign out + version */}
       <div style={{ padding: '12px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div style={{ padding: '6px 12px 8px', overflow: 'hidden' }}>
-          <div style={{ fontSize: '13px', fontWeight: '600', color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {session?.user?.name ?? 'Region Admin'}
-          </div>
-          <div style={{ fontSize: '11px', color: '#CC0000', textTransform: 'capitalize', fontWeight: '400' }}>
-            regionAdmin
-          </div>
-        </div>
         <button
           onClick={handleSignOut}
           style={{
