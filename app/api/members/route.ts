@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
+import { NON_ADMIN_FILTER } from '@/lib/member-filter'
 
 export async function GET() {
   const session = await auth()
@@ -11,7 +12,7 @@ export async function GET() {
   const chapterId = session.user.chapterId
 
   const members = await db.user.findMany({
-    where: { isActive: true, chapterId },
+    where: { isActive: true, chapterId, ...NON_ADMIN_FILTER },
     orderBy: { name: 'asc' },
     select: {
       id: true,

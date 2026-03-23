@@ -1,6 +1,7 @@
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { NextResponse } from 'next/server'
+import { NON_ADMIN_FILTER } from '@/lib/member-filter'
 
 export async function GET(request: Request) {
   const session = await auth()
@@ -23,6 +24,7 @@ export async function GET(request: Request) {
     chapterId: chapterId && regionChapterIds.includes(chapterId)
       ? chapterId
       : { in: regionChapterIds },
+    ...NON_ADMIN_FILTER,
   }
 
   if (q) {

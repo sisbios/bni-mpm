@@ -1,6 +1,7 @@
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { NextResponse } from 'next/server'
+import { NON_ADMIN_FILTER } from '@/lib/member-filter'
 
 export async function GET() {
   const session = await auth()
@@ -16,7 +17,7 @@ export async function GET() {
   const ids = chapters.map((c) => c.id)
 
   const [memberCounts, eventCounts, taskCounts, achievementCounts] = await Promise.all([
-    db.user.groupBy({ by: ['chapterId'], _count: { id: true }, where: { chapterId: { in: ids } } }),
+    db.user.groupBy({ by: ['chapterId'], _count: { id: true }, where: { chapterId: { in: ids }, ...NON_ADMIN_FILTER } }),
     db.event.groupBy({ by: ['chapterId'], _count: { id: true }, where: { chapterId: { in: ids } } }),
     db.weeklyTask.groupBy({ by: ['chapterId'], _count: { id: true }, where: { chapterId: { in: ids } } }),
     db.greenAchievement.groupBy({ by: ['chapterId'], _count: { id: true }, where: { chapterId: { in: ids } } }),

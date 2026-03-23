@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { db } from '@/lib/db'
 import { Users } from 'lucide-react'
+import { NON_ADMIN_FILTER } from '@/lib/member-filter'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,6 +27,7 @@ export default async function RegionMembersPage({ searchParams }: { searchParams
     where: {
       chapterId: chapterFilter ? chapterFilter : { in: chapterIds },
       isActive: true,
+      ...NON_ADMIN_FILTER,
     },
     orderBy: [{ chapterId: 'asc' }, { name: 'asc' }],
     select: { id: true, name: true, email: true, role: true, accessLevel: true, phone: true, business: true, chapterId: true, joinedAt: true },

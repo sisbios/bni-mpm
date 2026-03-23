@@ -1,6 +1,7 @@
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { NextResponse } from 'next/server'
+import { NON_ADMIN_FILTER } from '@/lib/member-filter'
 
 function isRegionAdmin(accessLevel: string) {
   return accessLevel === 'regionAdmin' || accessLevel === 'platform'
@@ -70,7 +71,7 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ id: str
   if (!existing) return NextResponse.json({ error: 'Chapter not found' }, { status: 404 })
 
   // Safety: check if chapter has members
-  const memberCount = await db.user.count({ where: { chapterId: id } })
+  const memberCount = await db.user.count({ where: { chapterId: id, ...NON_ADMIN_FILTER } })
   if (memberCount > 0) {
     return NextResponse.json(
       { error: `Cannot delete chapter with ${memberCount} active member${memberCount !== 1 ? 's' : ''}. Deactivate it instead.` },
