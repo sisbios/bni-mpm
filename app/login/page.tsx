@@ -126,8 +126,8 @@ export default function LoginPage() {
             fontFamily: 'var(--font-bebas), sans-serif', fontSize: '22px', color: '#fff', letterSpacing: '1px',
             boxShadow: '0 8px 24px rgba(204,0,0,0.4)',
           }}>BNI</div>
-          <div style={{ fontFamily: 'var(--font-bebas), sans-serif', fontSize: '28px', letterSpacing: '4px', color: '#C9A84C' }}>OSCAR</div>
-          <div style={{ fontSize: '13px', color: '#6B7280', letterSpacing: '2px', textTransform: 'uppercase', marginTop: '2px' }}>Chapter Portal</div>
+          <div style={{ fontFamily: 'var(--font-bebas), sans-serif', fontSize: '28px', letterSpacing: '4px', color: '#C9A84C' }}>MEMBER PORTAL</div>
+          <div style={{ fontSize: '13px', color: '#6B7280', letterSpacing: '2px', textTransform: 'uppercase', marginTop: '2px' }}>Sign in to continue</div>
         </div>
 
         {/* Tab switcher */}
