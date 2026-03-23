@@ -1,9 +1,10 @@
 /**
  * Excludes system/admin users from all member-facing queries.
- * Admin users (role='admin', accessLevel='superadmin') are back-office
- * accounts and must never appear in member counts, PALMS, traffic light,
- * or any chapter activity calculations.
+ * - role='admin'    → chapter back-office accounts
+ * - role='platform' → cross-region super admin (admin@bnimalappuram.com)
+ * These must never appear in member counts, lists, PALMS, traffic light,
+ * attendance percentages, or any chapter activity calculations.
  */
 export const NON_ADMIN_FILTER = {
-  role: { not: 'admin' },
+  role: { notIn: ['admin', 'platform'] },
 } as const

@@ -1,5 +1,6 @@
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
+import { NON_ADMIN_FILTER } from '@/lib/member-filter'
 import { NextResponse } from 'next/server'
 
 function getISOWeek(date: Date): string {
@@ -27,7 +28,7 @@ export async function GET() {
   const currentWeek = getISOWeek(now)
 
   const [totalMembers, upcomingEvents, openTasks, achievementsThisMonth] = await Promise.all([
-    db.user.count({ where: { isActive: true, role: { not: 'admin' }, chapterId } }),
+    db.user.count({ where: { isActive: true, ...NON_ADMIN_FILTER, chapterId } }),
     db.event.count({ where: { isActive: true, chapterId, date: { gte: now, lte: endOfMonth } } }),
     db.weeklyTask.count({ where: { week: currentWeek, status: { in: ['pending', 'callback'] }, chapterId } }),
     db.greenAchievement.count({ where: { createdAt: { gte: startOfMonth, lte: endOfMonth }, chapterId } }),
