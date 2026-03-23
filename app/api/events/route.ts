@@ -12,23 +12,31 @@ export async function GET(request: Request) {
   const month = searchParams.get('month')
   const year = searchParams.get('year')
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let where: any = { isActive: true, chapterId }
+  // Get the chapter's regionId so we can include regional events
+  const chapter = chapterId
+    ? await db.chapter.findUnique({ where: { id: chapterId }, select: { regionId: true } })
+    : null
+  const regionId = chapter?.regionId ?? null
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let dateFilter: any = {}
   if (month && year) {
-    const m = parseInt(month) - 1 // 0-indexed
+    const m = parseInt(month) - 1
     const y = parseInt(year)
-    const startDate = new Date(y, m, 1)
-    const endDate = new Date(y, m + 1, 0, 23, 59, 59)
-    where = { isActive: true, chapterId, date: { gte: startDate, lte: endDate } }
+    dateFilter = { date: { gte: new Date(y, m, 1), lte: new Date(y, m + 1, 0, 23, 59, 59) } }
   }
 
   const events = await db.event.findMany({
-    where,
-    orderBy: { date: 'asc' },
-    include: {
-      _count: { select: { rsvps: true } },
+    where: {
+      isActive: true,
+      ...dateFilter,
+      OR: [
+        { chapterId },
+        ...(regionId ? [{ regionId }] : []),
+      ],
     },
+    orderBy: { date: 'asc' },
+    include: { _count: { select: { rsvps: true } } },
   })
 
   return NextResponse.json(events)
@@ -37,16 +45,13 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  if (( session.user.accessLevel ?? 'member') === 'member') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  if ((session.user.accessLevel ?? 'member') === 'member') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const chapterId = session.user.chapterId
-
   const body = await request.json()
-  const { date, title, subtitle, tags, colors, eventType } = body
+  const { date, title, subtitle, tags, colors, eventType, bookingRequired } = body
 
-  if (!date || !title) {
-    return NextResponse.json({ error: 'Date and title are required' }, { status: 400 })
-  }
+  if (!date || !title) return NextResponse.json({ error: 'Date and title are required' }, { status: 400 })
 
   const event = await db.event.create({
     data: {
@@ -56,11 +61,11 @@ export async function POST(request: Request) {
       tags: Array.isArray(tags) ? JSON.stringify(tags) : tags || '[]',
       colors: Array.isArray(colors) ? JSON.stringify(colors) : colors || '[]',
       eventType: eventType || 'chapter',
+      bookingRequired: Boolean(bookingRequired),
       chapterId,
     },
   })
 
-  // Auto-create meeting slots for chapter meetings: 1 edu slot + 2 feature presentations
   if ((eventType || 'chapter') === 'chapter') {
     await db.meetingSlot.createMany({
       data: [
