@@ -1,28 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 /**
- * Multi-tenant middleware — Phase 3
+ * Multi-tenant middleware — Phase 3+
  *
  * Edge Runtime compatible — no Node.js modules, no DB calls, no auth().
  *
- * Sole responsibility: extract chapter slug from subdomain and inject it
- * as x-chapter-slug request header so all downstream handlers (API routes,
- * server components) can read the chapter context.
- *
- * Auth guard is handled at the layout level (Node.js runtime) — not here.
+ * BNI_APP_MODE=chapter  → extract chapter slug from subdomain, inject x-chapter-slug
+ * BNI_APP_MODE=region   → never inject chapter slug (regional admin container)
  *
  * Domain config is driven entirely by DOMAIN_BASE env var.
- * Future domain change → update env only, zero code changes.
  */
 
-const DOMAIN_BASE = (process.env.DOMAIN_BASE ?? 'bni.sisbios.cloud').split(':')[0]
+const APP_MODE = process.env.BNI_APP_MODE ?? 'chapter'
+const DOMAIN_BASE = (process.env.DOMAIN_BASE ?? 'sisbios.cloud').split(':')[0]
+
+// Reserved subdomains that are never chapter slugs
+const RESERVED = new Set(['www', 'bni', 'bnimpm', 'region', 'admin', 'api'])
 
 function getSubdomain(host: string): string | null {
+  if (APP_MODE === 'region') return null
   const hostname = host.split(':')[0]
   if (!hostname.endsWith('.' + DOMAIN_BASE)) return null
   const sub = hostname.slice(0, -(DOMAIN_BASE.length + 1))
-  // Reserved subdomains — no chapter context
-  const RESERVED = new Set(['www', 'bni', 'bnimpm', 'region', 'admin', 'api'])
   if (!sub || RESERVED.has(sub)) return null
   return sub
 }

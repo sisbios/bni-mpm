@@ -35,7 +35,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!user || !user.isActive) return null
         const valid = await bcrypt.compare(credentials.password as string, user.password)
         if (!valid) return null
-        const accessLevel = await getAccessLevel(user.role)
+        // Use DB-stored accessLevel directly; fall back to role-derived value
+        const accessLevel = user.accessLevel || await getAccessLevel(user.role)
         return {
           id: user.id, email: user.email, name: user.name,
           role: user.role, accessLevel,
@@ -70,7 +71,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             },
           })
           if (!user) return null
-          const accessLevel = await getAccessLevel(user.role)
+          const accessLevel = user.accessLevel || await getAccessLevel(user.role)
           return {
             id: user.id, email: user.email, name: user.name,
             role: user.role, accessLevel,
