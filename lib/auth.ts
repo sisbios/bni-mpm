@@ -12,7 +12,7 @@ function deriveAccessLevel(role: string): string {
 
 async function getAccessLevel(role: string): Promise<string> {
   try {
-    const chapterRole = await db.chapterRole.findUnique({ where: { slug: role } })
+    const chapterRole = await db.chapterRole.findFirst({ where: { slug: role } })
     return chapterRole?.accessLevel ?? deriveAccessLevel(role)
   } catch {
     return deriveAccessLevel(role)

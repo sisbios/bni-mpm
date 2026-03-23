@@ -33,17 +33,17 @@ export async function POST(request: Request) {
   if (!canAward) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const body = await request.json()
-  const { userId, pinSlug, notes } = body
+  const { userId, pinId, notes } = body
 
-  if (!userId || !pinSlug) {
-    return NextResponse.json({ error: 'userId and pinSlug are required' }, { status: 400 })
+  if (!userId || !pinId) {
+    return NextResponse.json({ error: 'userId and pinId are required' }, { status: 400 })
   }
 
   const pin = await db.memberPin.upsert({
-    where: { userId_pinSlug: { userId, pinSlug } },
+    where: { userId_pinId: { userId, pinId } },
     create: {
       userId,
-      pinSlug,
+      pinId,
       awardedBy: session.user.id,
       notes: notes ?? null,
     },

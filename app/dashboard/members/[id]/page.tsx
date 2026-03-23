@@ -381,7 +381,7 @@ export default async function MemberProfilePage({
         memberId={id}
         memberName={user.name}
         trafficScore={trafficScore}
-        memberPins={memberPins.map((mp) => ({ id: mp.id, pinSlug: mp.pinSlug, pin: mp.pin, awardedAt: mp.awardedAt?.toString() ?? '' }))}
+        memberPins={memberPins.map((mp) => ({ id: mp.id, pinId: mp.pinId, pin: mp.pin, awardedAt: mp.awardedAt?.toString() ?? '' }))}
         allPins={allPins}
         canManagePins={canManagePins}
         canManage={canManage}
