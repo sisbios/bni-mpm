@@ -1,18 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 /**
- * Multi-tenant middleware — Phase 3+
- *
- * Edge Runtime compatible — no Node.js modules, no DB calls, no auth().
+ * Multi-tenant middleware
  *
  * BNI_APP_MODE=chapter  → extract chapter slug from subdomain, inject x-chapter-slug
- * BNI_APP_MODE=region   → never inject chapter slug (regional admin container)
+ *                          Block /region routes → redirect to REGION_URL
+ * BNI_APP_MODE=region   → never inject chapter slug
+ *                          Block /dashboard and /portal routes (chapter-only)
  *
  * Domain config is driven entirely by DOMAIN_BASE env var.
+ * REGION_URL env var points to the region admin container URL.
  */
 
 const APP_MODE = process.env.BNI_APP_MODE ?? 'chapter'
 const DOMAIN_BASE = (process.env.DOMAIN_BASE ?? 'sisbios.cloud').split(':')[0]
+const REGION_URL = (process.env.REGION_URL ?? 'https://bnimpm.sisbios.cloud').replace(/\/$/, '')
 
 // Reserved subdomains that are never chapter slugs
 const RESERVED = new Set(['www', 'bni', 'bnimpm', 'region', 'admin', 'api'])
@@ -27,9 +29,24 @@ function getSubdomain(host: string): string | null {
 }
 
 export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
   const host = request.headers.get('host') ?? ''
-  const slug = getSubdomain(host)
 
+  // CHAPTER CONTAINER: hard-block /region/** — redirect to the region admin URL.
+  // This prevents regionAdmin users from accidentally using the region dashboard
+  // through a chapter subdomain, regardless of how they got there.
+  if (APP_MODE === 'chapter' && pathname.startsWith('/region')) {
+    const target = new URL(pathname + request.nextUrl.search, REGION_URL)
+    return NextResponse.redirect(target, { status: 302 })
+  }
+
+  // REGION CONTAINER: block chapter-only paths
+  if (APP_MODE === 'region' && (pathname.startsWith('/dashboard') || pathname.startsWith('/portal'))) {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  // Inject x-chapter-slug header for chapter container
+  const slug = getSubdomain(host)
   if (!slug) return NextResponse.next()
 
   const headers = new Headers(request.headers)
