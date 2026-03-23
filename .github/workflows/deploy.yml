@@ -54,15 +54,16 @@ jobs:
             echo "=== Building Docker image ==="
             docker build --network host -t bni-mpm:local .
 
-            echo "=== Restarting app ==="
-            docker compose up -d --force-recreate app
+            echo "=== Restarting app containers ==="
+            docker compose up -d --force-recreate app region
 
             echo "=== Running DB migrations ==="
-            sleep 8
+            sleep 10
             docker exec bni-mpm npx prisma db push || true
 
             echo "=== Health check ==="
             sleep 5
-            curl -sf http://localhost:3005 > /dev/null && echo "App is UP" || (echo "Health check FAILED" && exit 1)
+            curl -sf http://localhost:3005 > /dev/null && echo "Chapter App is UP" || (echo "Chapter health check FAILED" && exit 1)
+            curl -sf http://localhost:3006 > /dev/null && echo "Region App is UP" || (echo "Region health check FAILED" && exit 1)
 
             echo "=== Deploy complete ==="
