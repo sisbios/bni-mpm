@@ -20,6 +20,7 @@ import {
   ChevronRight,
   UserCog,
   Menu,
+  ShieldCheck,
 } from 'lucide-react'
 
 type NavItem = { href: string; icon: React.ElementType; label: string; exact?: boolean }
@@ -35,6 +36,7 @@ const navItems: NavItem[] = [
   { href: '/region/visitors',      icon: UserCheck,       label: 'Visitors Pool' },
   { href: '/region/traffic-light', icon: TrendingUp,      label: 'Traffic Light' },
   { href: '/region/analytics',     icon: BarChart3,       label: 'Analytics' },
+  { href: '/region/roles',         icon: ShieldCheck,     label: 'Manage Roles' },
 ]
 
 const bottomNavItems: NavItem[] = [
