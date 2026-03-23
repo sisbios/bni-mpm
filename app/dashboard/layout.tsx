@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
+import { APP_VERSION } from '@/lib/version'
 import {
   LayoutDashboard,
   Users,
@@ -278,6 +279,9 @@ function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () 
           <LogOut size={14} />
           Sign out
         </button>
+        <div style={{ textAlign: 'center', marginTop: '8px', fontSize: '10px', color: '#374151', letterSpacing: '1px' }}>
+          {APP_VERSION}
+        </div>
       </div>
     </div>
   )
