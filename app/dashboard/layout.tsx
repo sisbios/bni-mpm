@@ -64,7 +64,7 @@ const bottomNavItems: NavItem[] = [
 ]
 
 function canSeeItem(item: NavItem, accessLevel: string, role: string): boolean {
-  if (accessLevel === 'superadmin') return true
+  if (accessLevel === 'superadmin' || accessLevel === 'platform') return true
   if (item.roles?.includes(role)) return true
   if (item.access === 'superadmin') return false
   if (item.access === 'officer') return accessLevel === 'officer'

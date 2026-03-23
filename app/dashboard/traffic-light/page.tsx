@@ -50,7 +50,7 @@ export default async function TrafficLightPage() {
 
   // Only head table can enter scores
   const canEdit =
-    accessLevel === 'superadmin' ||
+    accessLevel === 'superadmin' || accessLevel === 'platform' ||
     ['president', 'vicePresident'].includes(session.user.role ?? '')
 
   const currentWeek = getISOWeek(new Date())

@@ -16,8 +16,8 @@ export default async function SettingsPage() {
 
   const accessLevel = session.user.accessLevel ?? 'officer'
   const role = session.user.role ?? ''
-  const canEditChapter = accessLevel === 'superadmin' || ['president', 'vicePresident', 'treasurer'].includes(role)
-  const canManageRoles = accessLevel === 'superadmin' || ['president', 'vicePresident'].includes(role)
+  const canEditChapter = accessLevel === 'superadmin' || accessLevel === 'platform' || ['president', 'vicePresident', 'treasurer'].includes(role)
+  const canManageRoles = accessLevel === 'superadmin' || accessLevel === 'platform' || ['president', 'vicePresident'].includes(role)
 
   let chapterSettings: Record<string, string> = {}
   if (canEditChapter) {
