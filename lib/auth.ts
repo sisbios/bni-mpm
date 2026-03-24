@@ -37,10 +37,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!valid) return null
         // Use DB-stored accessLevel directly; fall back to role-derived value
         const accessLevel = user.accessLevel || await getAccessLevel(user.role)
+        const chapter = user.chapterId
+          ? await db.chapter.findUnique({ where: { id: user.chapterId }, select: { name: true } })
+          : null
         return {
           id: user.id, email: user.email, name: user.name,
           role: user.role, accessLevel,
           chapterId: user.chapterId ?? null,
+          chapterName: chapter?.name ?? null,
           regionId: user.regionId ?? null,
         }
       },
@@ -72,10 +76,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           })
           if (!user) return null
           const accessLevel = user.accessLevel || await getAccessLevel(user.role)
+          const chapter = user.chapterId
+            ? await db.chapter.findUnique({ where: { id: user.chapterId }, select: { name: true } })
+            : null
           return {
             id: user.id, email: user.email, name: user.name,
             role: user.role, accessLevel,
             chapterId: user.chapterId ?? null,
+            chapterName: chapter?.name ?? null,
             regionId: user.regionId ?? null,
           }
         } catch (e) {
@@ -92,6 +100,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.role = (user as any).role
         token.accessLevel = (user as any).accessLevel ?? deriveAccessLevel((user as any).role ?? 'member')
         token.chapterId = (user as any).chapterId ?? null
+        token.chapterName = (user as any).chapterName ?? null
         token.regionId = (user as any).regionId ?? null
       }
       if (!token.accessLevel && token.role) {
@@ -105,6 +114,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.role = token.role as string
         session.user.accessLevel = (token.accessLevel as string) ?? deriveAccessLevel(token.role as string)
         session.user.chapterId = (token.chapterId as string | null) ?? null
+        session.user.chapterName = (token.chapterName as string | null) ?? null
         session.user.regionId = (token.regionId as string | null) ?? null
       }
       return session
