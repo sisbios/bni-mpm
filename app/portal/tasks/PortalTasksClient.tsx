@@ -52,7 +52,7 @@ function getWeekLabel(isoWeek: string) {
   return `${weekStart.toLocaleDateString('en', { month: 'short', day: 'numeric' })} – ${weekEnd.toLocaleDateString('en', { month: 'short', day: 'numeric' })}`
 }
 
-export default function PortalTasksClient({ userId, userName }: { userId: string; userName: string }) {
+export default function PortalTasksClient({ userId, userName, chapterName }: { userId: string; userName: string; chapterName: string }) {
   const [week, setWeek] = useState(getCurrentISOWeek())
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
@@ -292,7 +292,7 @@ export default function PortalTasksClient({ userId, userName }: { userId: string
                             Contact from {task.contributorName}&apos;s sphere
                           </div>
                           <div style={{ fontSize: '13px', color: '#8B95A3', marginTop: '2px' }}>
-                            Intro: &quot;Hi, I&apos;m calling from BNI Oscar Chapter. {task.contributorName} thought you might be interested in joining our weekly business networking meeting.&quot;
+                            Intro: &quot;Hi, I&apos;m calling from {chapterName}. {task.contributorName} thought you might be interested in joining our weekly business networking meeting.&quot;
                           </div>
                         </div>
                       </div>

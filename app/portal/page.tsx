@@ -194,7 +194,7 @@ export default async function PortalPage() {
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: '15px', fontWeight: '700', color: '#fff', lineHeight: 1.2 }}>{memberData?.name}</div>
                 <div style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '2px', marginBottom: '5px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {memberData?.business ?? 'BNI Oscar Chapter'}
+                  {memberData?.business ?? ''}
                 </div>
                 {roleDetails ? (
                   <span style={{

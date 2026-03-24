@@ -2,9 +2,9 @@ import { NextResponse } from 'next/server'
 
 export function GET() {
   const manifest = {
-    name: 'BNI Oscar Chapter',
-    short_name: 'BNI Oscar',
-    description: 'Chapter Management System for BNI Oscar Chapter, Malappuram Region',
+    name: 'BNI Chapter Platform',
+    short_name: 'BNI Chapter',
+    description: 'Chapter Management System — BNI Malappuram Region',
     start_url: '/',
     display: 'standalone',
     background_color: '#0A0F1E',
