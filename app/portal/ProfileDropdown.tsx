@@ -134,7 +134,7 @@ export default function ProfileDropdown() {
                   </div>
                 )}
                 <div style={{ fontSize: '10px', color: '#C9A84C', marginTop: '3px' }}>
-                  {profile?.category ?? 'BNI Oscar Member'}
+                  {profile?.category ?? 'BNI Member'}
                 </div>
               </div>
             </div>

@@ -28,13 +28,13 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'BNI Oscar Chapter | Malappuram',
-  description: 'Chapter Management System for BNI Oscar Chapter, Malappuram Region',
+  title: 'BNI Chapter Platform',
+  description: 'Chapter Management System — BNI Malappuram Region',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'BNI Oscar',
+    title: 'BNI Chapter',
   },
   formatDetection: {
     telephone: false,

@@ -50,7 +50,7 @@ function MemberAvatar({ member, roleColor, size, radius }: { member: Member; rol
   )
 }
 
-function ContactModal({ member, role, onClose }: { member: Member; role: RoleInfo | null; onClose: () => void }) {
+function ContactModal({ member, role, chapterName, onClose }: { member: Member; role: RoleInfo | null; chapterName: string; onClose: () => void }) {
   const roleColor = role?.color ?? '#9CA3AF'
 
   function callMember() {
@@ -61,12 +61,12 @@ function ContactModal({ member, role, onClose }: { member: Member; role: RoleInf
   function whatsappMember() {
     if (!member.phone) { toast.error('No phone number available'); return }
     const num = member.phone.replace(/\D/g, '')
-    const msg = encodeURIComponent(`Hi ${member.name}, I'm reaching out from BNI Oscar Chapter.`)
+    const msg = encodeURIComponent(`Hi ${member.name}, I'm reaching out from ${chapterName}.`)
     window.open(`https://wa.me/${num}?text=${msg}`, '_blank')
   }
 
   function shareContact() {
-    const text = `${member.name}\n${member.business ?? 'BNI Oscar Chapter'}\n${member.phone ?? ''}`
+    const text = `${member.name}\n${member.business ?? chapterName}\n${member.phone ?? ''}`
     if (navigator.share) {
       navigator.share({ title: member.name, text }).catch(() => {})
     } else {
@@ -185,10 +185,12 @@ export default function PortalMembersClient({
   members,
   roleMap,
   currentUserId,
+  chapterName,
 }: {
   members: Member[]
   roleMap: Record<string, RoleInfo>
   currentUserId: string
+  chapterName: string
 }) {
   const [search, setSearch] = useState('')
   const [selectedMember, setSelectedMember] = useState<Member | null>(null)
@@ -215,7 +217,7 @@ export default function PortalMembersClient({
       `}</style>
 
       {selectedMember && (
-        <ContactModal member={selectedMember} role={roleMap[selectedMember.role] ?? null} onClose={() => setSelectedMember(null)} />
+        <ContactModal member={selectedMember} role={roleMap[selectedMember.role] ?? null} chapterName={chapterName} onClose={() => setSelectedMember(null)} />
       )}
 
       <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
