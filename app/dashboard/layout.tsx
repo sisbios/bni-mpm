@@ -97,7 +97,7 @@ function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () 
           letterSpacing: '1px', boxShadow: '0 4px 12px rgba(204,0,0,0.35)',
         }}>BNI</div>
         <div>
-          <div style={{ fontFamily: 'var(--font-bebas), sans-serif', fontSize: '18px', color: '#C9A84C', letterSpacing: '3px', lineHeight: 1.1 }}>OSCAR</div>
+          <div style={{ fontFamily: 'var(--font-bebas), sans-serif', fontSize: '18px', color: '#C9A84C', letterSpacing: '3px', lineHeight: 1.1 }}>{session?.user?.chapterName?.toUpperCase() ?? 'CHAPTER'}</div>
           <div style={{ fontSize: '9px', color: '#8B95A3', letterSpacing: '2px', textTransform: 'uppercase' }}>Chapter Admin</div>
         </div>
         {onClose && (
@@ -443,7 +443,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <Menu size={18} />
           </button>
           <div style={{ fontFamily: 'var(--font-bebas), sans-serif', fontSize: '20px', letterSpacing: '3px', color: '#ffffff' }}>
-            BNI <span style={{ color: '#C9A84C' }}>OSCAR</span>
+            BNI <span style={{ color: '#C9A84C' }}>{session?.user?.chapterName?.toUpperCase() ?? 'CHAPTER'}</span>
           </div>
           <ProfileMenu />
         </div>
