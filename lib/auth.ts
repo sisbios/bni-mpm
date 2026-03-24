@@ -106,6 +106,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (!token.accessLevel && token.role) {
         token.accessLevel = deriveAccessLevel(token.role as string)
       }
+      // Backfill chapterName for existing sessions minted before this field existed
+      if (token.chapterName === undefined && token.chapterId) {
+        try {
+          const chapter = await db.chapter.findUnique({
+            where: { id: token.chapterId as string },
+            select: { name: true },
+          })
+          token.chapterName = chapter?.name ?? null
+        } catch {
+          token.chapterName = null
+        }
+      }
       return token
     },
     async session({ session, token }) {
